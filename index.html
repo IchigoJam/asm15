@@ -1,5 +1,5 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>asm15 - Assembler for IchigoJam</title>
+<title>asm15 assembler for IchigoJam / IchigoLatte</title>
 <meta property="og:image" content="asm15.png">
 <link rel="apple-touch-icon" href="asm15.png"/>
 <script src="asm15.js"></script>
@@ -10,7 +10,7 @@ li {
 }
 </style>
 </head><body>
-<h1>asm15 - Assembler for IchigoJam</h1>
+<h1>asm15 assembler for IchigoJam / IchigoLatte</h1>
 <form id="form1">
 <h3>SRC</h3>
 <div>
@@ -89,11 +89,13 @@ window.onload = function() {
 まだおかしなところはあるかもしれません（値の範囲判定をしてないので注意）
 <ul>
 
-<li><a href="http://fukuno.jig.jp/">2017/09/16</a><br>
+<li><a href="http://fukuno.jig.jp/1880">2017/09/16</a><br>
 
 GOSUB→CALL(GOSUBも可)<br>
 符号付きメモリアクセスに（Rd = [Rn + Rm]C / Rd = [Rn + Rm]S）に対応（<a href=http://fukuno.jig.jp/app/IchigoJam/armasm.html>マシン語表</a>）<br>
-IchigoLatte用出力を追加 (Thank to <a href=http://tagiyasoft.blog.jp/asm15.js>tagiyasoft</a>)
+IchigoLatte用出力を追加 (Thank to <a href=http://tagiyasoft.blog.jp/asm15.js>tagiyasoft</a>)<br>
+DATA表記の4byteアラインずれの修正<br>
+Rd = [PC + n]L と、L付き表記に変更<br>
 </li>
 
 <li><a href="http://fukuno.jig.jp/">2017/05/16</a><br> 

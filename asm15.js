@@ -1,10 +1,10 @@
 //GLOBAL
-var NOTOPCODE = 0x100000000;
-var YET = 0x100000000 + 1;
-var COMMENT = 0x100000000 + 2;
-var EMPTYLINE = 0x100000000+3;
-var ASMERR = 0x100000000 + 4;
-var LABEL = 0x100000000 + 5;
+var NOTOPCODE = 0x100000000 + 0;
+var YET       = 0x100000000 + 1;
+var COMMENT   = 0x100000000 + 2;
+var EMPTYLINE = 0x100000000 + 3;
+var ASMERR    = 0x100000000 + 4;
+var LABEL     = 0x100000000 + 5;
 
 var lbl_dict = {};
 
@@ -110,23 +110,26 @@ function rlist(){
 function lb(pc){
 
 }
-function n(bits,s,ofs,div){
+function n(bits, s, ofs, div, align4) {
 	//dat bit shift
 	ofs=(ofs!=undefined)?ofs:0;
 	div=(div!=undefined)?div:0;
 	var mask=Math.pow(2,bits)-1;
 	var mx=Math.pow(2,bits-1)-1;
 	var mn=-Math.pow(2,bits-1);
-	if (mask<1)
-		mask=0;
+	if (mask < 1)
+		mask = 0;
 	var f = function(d, pc){
-		var ret,lbl,i;
-		ret=d.match(/@\w+/g);
-		if (ret != null){
-			for(i=0;i<ret.length;i++){
-				lbl = ret[i];
+		var ret = d.match(/@\w+/g);
+		if (ret != null) {
+			for (var i = 0; i < ret.length; i++) {
+				var lbl = ret[i];
 				if (lbl in lbl_dict) {
-					rel = (lbl_dict[lbl] - (pc & 0x0fffffffe)) >> div; // 0x0fffffffc -> 0x0fffffffe
+					var ad = lbl_dict[lbl] - (pc & 0x0fffffffe);
+					if (align4 && ad % 4 == 2) { // 追加 r0=[sp+n] のとき (バグ修正)
+						ad += 2;
+					}
+					rel = ad >> div; // 0x0fffffffc -> 0x0fffffffe
 //					alert(lbl_dict[lbl].toString(16) + " " + pc.toString(16) + " " + div + " " + ((pc & 0x0fffffffe)) + " " + lbl + " " + rel);
 					if (rel > mx || rel < mn) {
 						return ASMERR
@@ -137,8 +140,8 @@ function n(bits,s,ofs,div){
 				}
 			}
 		}
-		d=pint(d)+ofs;
-		return (d&mask)<<s;
+		d = pint(d) + ofs;
+		return (d & mask) << s;
 	}
 	return f;
 }
@@ -171,11 +174,11 @@ function bl(bits,s,ofs){
 	return f;
 
 }
-function build_m(f,ar,pc){
-	var i,op = f[1],_op;
-	for (i=1;i<ar.length;i++) {
+function build_m(f, ar, pc) {
+	var op = f[1];
+	for (var i = 1; i < ar.length; i++) {
 //		alert(ar[i]);
-		_op = f[i+1](ar[i], pc);
+		var _op = f[i+1](ar[i], pc);
 		if (_op >= NOTOPCODE) {
 			return _op;
 		} else {
@@ -201,8 +204,8 @@ var cmdlist = [
 
 //sp
 ["reg = sp + n",0xa800,b(3,8),b(8,0,0)],
-["reg = [ sp + n ]",0x9800,b(3,8),b(8,0)],
-["[ sp + n ] = reg",0x9000,b(8,0),b(3,8)],
+["reg = [ sp + n ] l",0x9800,b(3,8),b(8,0)],
+["[ sp + n ] l = reg",0x9000,b(8,0),b(3,8)],
 
 //memory
 
@@ -266,7 +269,7 @@ var cmdlist = [
 ["reg = pc + n",0xa000,b(3,8),n(8,0,-1,2)],
 ["reg = label",0xa000,b(3,8),n(8,0,-1,2)],
 
-["reg = [ n ]",0x4800,b(3,8,0),n(8,0,-1,2)],
+["reg = [ n ] l",0x4800,b(3,8,0),n(8,0,-1,2,1)],
 ["reg = n",0x2000,b(3,8),b(8,0,0)],
 ["push rlist",0xb400,rlist()],
 ["pop rlist",0xbc00,rlist()],
@@ -400,28 +403,28 @@ function m2b10(lines,outlist){
 	bas=lines2.join("\n");
 	return bas;
 }
-function m2b2(lines,outlist){
-	var p,p0,p1;
-	var bas="",i,line,out,nln;
-	var skips={undefined:true,LABEL:true,COMMENT:true,NOTOPCODE:true};
-	for(i=0; i<outlist.length; i++){
-		out=outlist[i];
-		l=out[0];
-		a=out[1];
-		p=out[2];
-		line=lines[l];
+function m2b2(lines, outlist){
+	var bas = "";
+	var skips = { undefined: true, LABEL: true, COMMENT: true, NOTOPCODE:true };
+	for (var i = 0; i < outlist.length; i++) {
+		var out = outlist[i];
+		var l = out[0];
+		var a = out[1];
+		var p = out[2];
+		var line = lines[l];
 
-		if(p==EMPTYLINE){
+		if (p==EMPTYLINE) {
 			continue;
-		}else if(p===undefined||p===null||p===false||p>=NOTOPCODE){
-			nln=i*10+10;
-			bas+=""+nln+"'"+line+"\n";
-		}else{
-
-			p0=p&0x0ff; p1=(p>>8)&0x0ff
-			p0=zero2(p0);p1=zero2(p1);
-			nln=i*10+10;
-			bas+=""+nln+" "+"poke #"+a.toString(16)+",`"+p0+",`"+p1+" :'"+line+"\n";
+		} else if (p === undefined || p === null || p === false || p >= NOTOPCODE) {
+			var nln = i * 10 + 10;
+			bas += nln + "'" + line + "\n";
+		} else {
+			var p0 = p & 0x0ff;
+			var p1 = (p >> 8) & 0x0ff;
+			p0 = zero2(p0);
+			p1 = zero2(p1);
+			var nln = i * 10 + 10;
+			bas += nln + " poke #" + a.toString(16) + ",`" + p0 + ",`" + p1+" :'" + line + "\n";
 		}
 	}
 	return bas;
@@ -559,15 +562,14 @@ function cutComment(s) {
 	return s.substring(0, n);
 };
 
-function asmln(ln,prgctr){
+function asmln(ln, prgctr) {
 	var p,m,j;
 	ln = cutComment(ln);
 	//ln=ln.toLowerCase().replace(/\s/g,"");
 	for (j = 0; j < patlist.length; j++) {
-//		console.log(patlist[j]);
 		m = ln.match(patlist[j]);
 		if (m) {
-			p = build_m(cmdlist[j],m,prgctr);
+			p = build_m(cmdlist[j], m, prgctr);
 			return p;
 		}
 	}
@@ -607,7 +609,7 @@ function pdat(ln,pc){
 		ret.push(d&msk);
 	}
 	var _ret;
-	if (sz==1){
+	if (sz==1) {
 		_ret=ret
 		ret=[];
 		if(_ret.length%2){
@@ -616,17 +618,18 @@ function pdat(ln,pc){
 		for(i=0;i<_ret.length;i+=2){
 			ret.push(_ret[i]|(_ret[i+1]<<8));
 		}
-	}else if (sz==4){
+	} else if (sz == 4){
 		_ret=ret;
-		ret=[];
+		ret = [];
 		//align
-		if (pc%4==2){
-			ret.unshift(0xffff);
+		if (pc % 4 == 2) {
+//			ret.unshift(0xffff);
+			ret.unshift(0);
 		};
 		
-		for(i=0;i<_ret.length;i++){
-			ret.push(_ret[i]&0xffff);
-			ret.push((_ret[i]>>16)&0xffff);
+		for (i = 0; i < _ret.length; i++){
+			ret.push(_ret[i] & 0xffff);
+			ret.push((_ret[i] >> 16) & 0xffff);
 		}
 	}
 	return ret
@@ -649,7 +652,7 @@ function sublbl(d,pc){
 	d=pint(d);
 	return d;
 }
-function gsb(d,pc){
+function gsb(d,pc) {
 	var rel = sublbl(d,pc);
 	var h,l,ret;
 	if (rel == YET) {
@@ -677,8 +680,8 @@ function assemble() {
 	dom_hex=document.getElementById("textarea2");
 	dom_err=document.getElementById("textarea3");
 	dom_adr=document.getElementById("txtadr");
-	var fmt=dom_fmt.value;
-	var fm2b=fmt_dict[fmt];
+	var fmt = dom_fmt.value;
+	var fm2b = fmt_dict[fmt];
 	var s = dom_src.value;
 	s = s.replace(/\/\*([^*]|\*[^\/])*\*\//g,"");
 	var lines = s.split("\n");
@@ -694,25 +697,25 @@ function assemble() {
 		orglines.push(lines[i]);
 	}
 	
-	for (var i=0;i<lines.length;i++){
+	for (var i = 0; i < lines.length; i++) {
 		line = lines[i].toLowerCase().replace(/\s/g,"");
 		lines[i] = line;
 
-		if (line.charAt(0)=="@") {
+		if (line.charAt(0) == "@") {
 			lbl_dict[cutComment(line)] = prgctr;
 			outlist.push([i,prgctr,LABEL]);
 			continue;
 		} else if (line.charAt(0)=="'"||line.slice(0,3)=="rem"){
 			outlist.push([i,prgctr,COMMENT]);
 			continue;
-		} else if (line.slice(0,4)=="data") {
-			dlist=pdat(line,prgctr);
+		} else if (line.slice(0,4) == "data") {
+			dlist = pdat(line, prgctr);
 			for (j = 0; j < dlist.length; j++){
-				outlist.push([i,prgctr,dlist[j]]);
-				prgctr+=2;
+				outlist.push([i, prgctr, dlist[j]]);
+				prgctr += 2;
 			}
 			continue;
-		} else if (line=="") {
+		} else if (line == "") {
 			outlist.push([i,prgctr,EMPTYLINE]);
 			continue;
 		} else {
@@ -724,7 +727,7 @@ function assemble() {
 					prgctr += 2;
 				} else if (line.slice(0,4) == "call" || line.slice(0,5) == "gosub") {
 					p = gsb(line.charAt(0) == 'c' ? line.slice(4) : line.slice(5), prgctr);
-					if (p == YET){
+					if (p == YET) {
 						p1 = YET;
 						p2 = YET;
 					} else {
@@ -744,14 +747,15 @@ function assemble() {
 	}
 	
 	for (i = 0; i < outlist.length; i++){
-		lno=outlist[i][0];
-		prgctr=outlist[i][1];
-		p=outlist[i][2];
-		line=lines[lno].toLowerCase();
-		if (p>=NOTOPCODE){
-
+		lno = outlist[i][0];
+		prgctr = outlist[i][1];
+		p = outlist[i][2];
+		line = lines[lno].toLowerCase();
+//		console.log(lines[i] + " " + prgctr + " " + p.toString(16));
+		
+		if (p >= NOTOPCODE) {
 		}
-		if(p==YET){
+		if (p == YET) {
 			if (line.slice(0,4) == "call" || line.slice(0,5) == "gosub") {
 				p = gsb(line.charAt(0) == 'c' ? line.slice(4) : line.slice(5), prgctr);
 				p1=p[0];
@@ -764,8 +768,8 @@ function assemble() {
 					alert("label not found in " + lno + "\n" + orglines[lno]);
 				}
 			} else {
-				p=asmln(line,prgctr);
-				outlist[i]=[lno,prgctr,p];
+				p = asmln(line,prgctr);
+				outlist[i] = [ lno, prgctr, p ];
 				
 				if (outlist[i][2] == YET) {
 					alert("label not found in " + lno + "\n" + orglines[lno]);
@@ -773,12 +777,9 @@ function assemble() {
 			}
 		}
 	}
-	bas = fm2b(lines,outlist);
+	bas = fm2b(lines, outlist);
 	dom_hex.value = bas;
-//	alert(prgctr + " " + startadr + " " + (prgctr - startadr));
-//	alert(outlist[outlist.length - 1][1]);
 	binsize.textContent = getSize(lines, outlist);
-//outlist[outlist.length - 1][1] - startadr;
 	if (dom_hex.textContent==bas)
 		return;
 	dom_hex.textContent = bas;
