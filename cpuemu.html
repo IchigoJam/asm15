@@ -1,0 +1,301 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<meta name="viewport" content="target-densitydpi=low-dpi, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, width=device-width"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/><!-- default / black / black-translucent -->
+<meta name="format-detection" content="telephone=no"/>
+<title>cpuemu - Alpha1</title>
+<meta property="og:image" content="cpuemu.png">
+<link rel="apple-touch-icon" href="cpuemu.png"/>
+<style>
+body {
+	font-family: sans-serif;
+}
+</style>
+<script src="lib/fukuno.js"></script>
+<script>"use strict";
+
+var CPU = function() {
+	this.r = []; // var:0-7, sp:13, link:14, pc:15
+	this.status = {
+		get: function() {
+			var res = 0;
+			res |= (this.n ? (1 << 31) : 0);
+			res |= (this.z ? (1 << 30) : 0);
+			res |= (this.c ? (1 << 29) : 0);
+			res |= (this.v ? (1 << 28) : 0);
+			res |= (this.q ? (1 << 27) : 0);
+			res |= ((this.it & 3) << 25);
+			res |= (this.j ? (1 << 24) : 0);
+			res |= ((this.ge & 0xf) << 16);
+			res |= ((this.it & 0xfc) << 8);
+			res |= (this.E ? (1 << 9) : 0);
+			res |= (this.A ? (1 << 8) : 0);
+			res |= (this.I ? (1 << 7) : 0);
+			res |= (this.F ? (1 << 6) : 0);
+			res |= (this.t ? (1 << 5) : 0);
+			res |= (this.mode & 0x1f);
+			return res & 0xffffffff;
+		},
+		set: function(n) {
+			this.n = (n & (1 << 31)) != 0;
+			this.z = (n & (1 << 30)) != 0;
+			this.c = (n & (1 << 29)) != 0;
+			this.v = (n & (1 << 28)) != 0;
+			this.q = (n & (1 << 27)) != 0;
+			this.it = (((n >> 8) & 0xfc) | ((n >> 25) & 3));
+			this.j = (n & (1 << 24)) != 0;
+			this.ge = ((n >> 16) & 0xf);
+			this.E = (n & (1 << 9)) != 0;
+			this.A = (n & (1 << 8)) != 0;
+			this.I = (n & (1 << 7)) != 0;
+			this.F = (n & (1 << 6)) != 0;
+			this.t = (n & (1 << 5)) != 0;
+			this.mode = n & 0x1f;
+		}
+	};
+	this.reset = function() {
+		for (var i = 0; i < 16; i++)
+			this.r[i] = 0;
+		this.status.set(0);
+	};
+	this.reset();
+	
+	this.mem = {
+		ram: [],
+		get: function(ad) {
+			return this.ram[ad];
+		},
+		set: function(ad, n) {
+			this.ram[ad] = n;
+		},
+		get16: function(ad) {
+			var n = this.ram[ad++];
+			n |= this.ram[ad] << 8;
+			return n;
+		},
+		set16: function(ad, n) {
+			this.ram[ad++] = n & 0xff;
+			this.ram[ad] = (n >> 8) & 0xff;
+		},
+	};
+	this.step = function() {
+		var code = this.mem.get16(this.r[15]);
+//		this.code = code;
+		this.r[15] += 2;
+//		console.log(code.toString(2));
+//		alert(code.toString(2));
+		var chk = function(bin) {
+			var n = parseInt(bin, 2);
+			var c = code >> (16 - bin.length);
+			return c == n;
+		};
+		var getu = function(start, n) {
+			return (code >> start) & ((1 << n) - 1);
+		};
+		var getn = function(start, n) {
+			var res = (code >> start) & ((1 << n) - 1);
+			if ((res >> (n - 1)) != 0)
+				return res - (1 << n);
+			return res;
+		};
+		this.setflg = function(n) {
+			this.status.z = n == 0;
+			this.status.n = (n >> 31) != 0;
+			return n;
+		};
+		if (chk("00100")) { // Rd = u8
+			this.r[getu(8, 3)] = this.setflg(getu(0, 8));
+		} else if (chk("0100011000")) { // Rd = Rm
+			this.r[getu(0, 3)] = this.setflg(this.r[getu(3, 3)]);
+		} else if (chk("01111")) { // Rd = [Rn + u5]
+			this.r[getu(0, 3)] = this.setflg(this.mem.get(this.r[getu(3, 3)] + getu(6, 5)));
+		} else if (chk("01110")) { // [Rn + u5] = Rd
+			this.mem.set(this.r[getu(3, 3)] + getu(6, 5), this.setflg(this.r[getu(0, 3)]));
+		} else if (chk("0101110")) { // Rd = [Rn + Rm]
+			this.r[getu(0, 3)] = this.setflg(this.mem.get(this.r[getu(3, 3)] + this.r[getu(6, 3)]));
+		} else if (chk("0101010")) { // [Rn + Rm] = Rd
+			this.mem.set(this.r[getu(3, 3)] + this.r[getu(6, 3)], this.setflg(this.r[getu(0, 3)]));
+		} else if (chk("00110")) { // Rd = Rd + u8
+			this.r[getu(8, 3)] = this.setflg(this.r[getu(8, 3)] + getu(0, 8));
+		} else if (chk("00111")) { // Rd = Rd - u8
+			this.r[getu(8, 3)] = this.setflg(this.r[getu(8, 3)] - getu(0, 8));
+		} else if (chk("00000")) { // Rd = Rm << u5
+			this.r[getu(0, 3)] = this.setflg(this.r[getu(3, 3)] << getu(6, 5));
+		} else if (chk("00001")) { // Rd = Rm >> u5
+			this.r[getu(0, 3)] = this.setflg(this.r[getu(3, 3)] >> getu(6, 5));
+		} else if (chk("0001100")) { // Rd = Rn + Rm
+			this.r[getu(0, 3)] = this.setflg(this.r[getu(3, 3)] + this.r[getu(6, 3)]);
+		} else if (chk("0001101")) { // Rd = Rn - Rm
+			this.r[getu(0, 3)] = this.setflg(this.r[getu(3, 3)] - this.r[getu(6, 3)]);
+		} else if (chk("0001110")) { // Rd = Rn + u3
+			this.r[getu(0, 3)] = this.setflg(this.r[getu(3, 3)] + getu(6, 3));
+		} else if (chk("0001111")) { // Rd = Rn - u3
+			this.r[getu(0, 3)] = this.setflg(this.r[getu(3, 3)] - getu(6, 3));
+		} else if (chk("0100000000")) { // Rd = Rd & Rm
+			this.r[getu(0, 3)] = this.setflg(this.r[getu(0, 3)] & this.r[getu(3, 3)]);
+		} else if (chk("0100000001")) { // Rd = Rd ^ Rm
+			this.r[getu(0, 3)] = this.setflg(this.r[getu(0, 3)] ^ this.r[getu(3, 3)]);
+		} else if (chk("0100000010")) { // Rd = Rd << Rs
+			this.r[getu(0, 3)] = this.setflg(this.r[getu(0, 3)] << this.r[getu(3, 3)]);
+		} else if (chk("0100000011")) { // Rd = Rd >> Rs
+			this.r[getu(0, 3)] = this.setflg(this.r[getu(0, 3)] >> this.r[getu(3, 3)]);
+		} else if (chk("0100001001")) { // Rd = -Rm
+			this.r[getu(0, 3)] = this.setflg(-this.r[getu(3, 3)]);
+		} else if (chk("0100001100")) { // Rd = Rd | Rm
+			this.r[getu(0, 3)] = this.setflg(this.r[getu(0, 3)] | this.r[getu(3, 3)]);
+		} else if (chk("0100001101")) { // Rd = Rd * Rm
+			this.r[getu(0, 3)] = this.setflg(this.r[getu(0, 3)] * this.r[getu(3, 3)]);
+		} else if (chk("0100001110")) { // Rd = Rd & ~Rm
+			this.r[getu(0, 3)] = this.setflg(this.r[getu(0, 3)] & ~this.r[getu(3, 3)]);
+		} else if (chk("0100001111")) { // Rd = ~Rm
+			this.r[getu(0, 3)] = this.setflg(~this.r[getu(3, 3)]);
+		} else if (chk("00101")) { // Rn - u8
+			this.setflg(this.r[getu(8, 3)] - getu(0, 8));
+		} else if (chk("0100001010")) { // Rn - Rm
+			this.setflg(this.r[getu(0, 3)] - this.r[getu(3, 3)]);
+		} else if (chk("0100001000")) { // Rn & Rm
+			this.setflg(this.r[getu(0, 3)] & this.r[getu(3, 3)]);
+		} else if (chk("11010000")) { // IF 0 GOTO n8 << 1
+			if (this.status.z)
+				this.r[15] = (getn(0, 8) + 2) << 1;
+		} else if (chk("11010001")) { // IF !0 GOTO n8 << 1
+			if (!this.status.z)
+				this.r[15] += (getn(0, 8) + 2) << 1;
+		} else if (chk("11100")) { // GOTO n11 << 1
+			this.r[15] += (getn(0, 11) + 2) << 1;
+		} else if (chk("0100011101110000")) { // ret
+//			alert("ret");
+			return 0;
+		}
+//		dump(this.r);
+		return 1;
+	};
+};
+
+window.onload = function() {
+	var cpu = new CPU();
+	
+	for (var i = 0; i < 16; i++) {
+		var r = create("div");
+		r.textContent = "R" + i + ": ";
+		get("regs").appendChild(r);
+	}
+	var r = create("div");
+	r.textContent = "Zero-flg: ";
+	get("regs").appendChild(r);
+	var showRegs = function() {
+		var rs = get("regs").childNodes;
+		for (var i = 0; i < 16; i++) {
+			rs[i].textContent = "R" + i + ": " + cpu.r[i] + " #" + cpu.r[i].toString(16);
+		}
+		rs[16].textContent = "Zero-flg: " + cpu.status.z;
+	};
+	
+	var reset = function() {
+		cpu.reset();
+		cpu.r[1] = 0x100;
+		cpu.r[15] = 0;
+		autoflg = false;
+		
+		var s = get("prog").value.split("\n");
+		var n = 0;
+		var parse = function(n) {
+			var s = "";
+			for (var i = 0; i < n.length; i++) {
+				if (n.charAt(i) == "0" || n.charAt(i) == "1")
+					s += n.charAt(i);
+			}
+			return s;
+		};
+		for (var i = 0; i < s.length; i++) {
+			var code = parse(s[i]);
+			if (code.length == 16) {
+				cpu.mem.set16(n * 2, parseInt(code, 2));
+				n++;
+			}
+		}
+		showRegs();
+	};
+	var autoflg = false;
+	var auto = function() {
+		if (autoflg) {
+			autoflg = false;
+			return;
+		} else {
+			autoflg = true;
+		}
+		var autostep = function() {
+			if (!autoflg)
+				return;
+			if (cpu.step()) {
+				setTimeout(autostep, 100);
+			} else {
+				autoflg = false;
+			}
+			showRegs();
+		};
+		autostep();
+	};
+	
+	get("reset").onclick = reset;
+	get("step").onclick = function() {
+		autoflg = false;
+		cpu.step();
+		showRegs();
+	};
+	get("auto").onclick = auto;
+	reset();
+};
+
+</script>
+<style>
+#credit {
+	margin-top: 20px;
+}
+#prog {
+	height: 400px;
+	width: 14em;
+	display: inline-block;
+	font-size: 14px;
+}
+#regs {
+	height: 400px;
+	display: inline-block;
+	font-size: 14px;
+	vertical-align: top;
+}
+#main {
+	padding: .5em;
+}
+a {
+	color: #333 !important;
+}
+</style>
+</head>
+<body>
+
+<h1>cpuemu - Alpha1</h1>
+<div id=main>
+使えるマシン語一覧: <a href=http://fukuno.jig.jp/1188>IchigoJamではじめるARMマシン語その3</a><br>
+<br><textarea id=prog>0010001100001001
+0000001000011011
+0101010001011011
+0011001100000001
+0000101000011010
+0010101000001010
+1101000111111010
+0100011101110000
+</textarea>
+<div id=regs></div>
+<br>
+<button id=auto>START</button>
+<button id=step>STEP</button>
+<button id=reset>RESET</button>
+</div>
+<div id='credit'>
+cpuemu a1 (for <a href=http://ichigojam.net/>IchigoJam</a>)<br>
+APP: <a href='http://fukuno.jig.jp/1328'>CC BY fukuno.jig.jp</a><br>
+</div>
+
+</body>
+<html>
