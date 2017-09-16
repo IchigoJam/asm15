@@ -15,6 +15,8 @@ var token_dict = {
 "reg":"r([0-7])",
 "push":"push",
 "pop":"pop",
+"ldm":"ldm",
+"stm":"stm",
 "!":"\\!",
 "=":"=",
 "<<":"<<",
@@ -51,6 +53,7 @@ var token_dict = {
 "cpsie":"cpsie",
 "nop":"nop",
 "wfi":"wfi",
+",":"\,",
 /*
 "bic":"bic",
 "asr":"asr",
@@ -62,7 +65,6 @@ var token_dict = {
 "sbc":"sbc",
 "(":"\\(",
 ")":"\\)",
-",":"\,",
 */
 };
 
@@ -266,13 +268,17 @@ var cmdlist = [
 ["reg = h",0x4640,b(3,0),b(3,3)],
 
 ["reg = reg",0x4600,b(3,0),b(3,3)],
-["reg = pc + n",0xa000,b(3,8),n(8,0,-1,2)],
-["reg = label",0xa000,b(3,8),n(8,0,-1,2)],
 
-["reg = [ n ] l",0x4800,b(3,8,0),n(8,0,-1,2,1)],
+["reg = pc + n",0xa000,b(3,8),n(8,0,-1,2)],
+["reg = label",0xa000,b(3,8),n(8,0,-1,2,1)], // align4
+["reg = [ n ] l",0x4800,b(3,8,0),n(8,0,-1,2,1)], // align4
+
 ["reg = n",0x2000,b(3,8),b(8,0,0)],
 ["push rlist",0xb400,rlist()],
 ["pop rlist",0xbc00,rlist()],
+
+["ldm reg , rlist",0xc800,b(3,8),rlist()], // add
+["stm reg , rlist",0xc000,b(3,8),rlist()], // add
 
 //other
 ["cpsid",0xB672],
@@ -640,11 +646,11 @@ function sublbl(d,pc){
 	ret=d.match(/@\w+/g);
 	if (ret!=null){
 		for(i=0;i<ret.length;i++){
-			lbl=ret[i];
-			if (lbl in lbl_dict){
+			lbl = ret[i];
+			if (lbl in lbl_dict) {
 				rel = lbl_dict[lbl] - pc;
-				d=d.replace(lbl,rel,"g")
-			}else{
+				d = d.replace(lbl, rel, "g")
+			} else {
 				return YET;
 			}
 		}
@@ -671,10 +677,9 @@ var bas="";
 var outlist=[];
 var fmt_dict = { "bas2": m2b2, "bas16": m2b16, "bas10": m2b10, "basar": m2ar, "bin": m2bin, "latte": m2js };
 function assemble() {
-	lbl_dict={};
-	outlist=[];
+	lbl_dict = {};
+	outlist = [];
 	var prgctr = 0;
-	var arg;
 	dom_src=document.getElementById("textarea1");
 	dom_fmt=document.getElementById("selfmt");
 	dom_hex=document.getElementById("textarea2");
@@ -791,7 +796,6 @@ function assemble() {
 	dom_hex.innerHTML=bas;
 	if (dom_hex.innerHTML==bas)
 		return;
-
 }
 
 function example() {
