@@ -344,9 +344,10 @@ function m2b16(lines,outlist){
 			}
 			p0=p&0x0ff;
 			p1=(p>>8)&0x0ff
-			p0=zero16(p0);p1=zero16(p1);
-			linehex.push("#"+p0.toString(16));
-			linehex.push("#"+p1.toString(16));
+			p0=zero16(p0);
+			p1=zero16(p1);
+			linehex.push("#"+p0);
+			linehex.push("#"+p1);
 		}
 		if(linehex.length>=8){
 			lines2.push(""+nln.toString(10)+" poke #"+lineadr.toString(16)+
@@ -450,8 +451,10 @@ function m2bin(lines,outlist){
 			continue;
 		}else if(p===undefined||p===null||p===false||p>=NOTOPCODE){
 		}else{
-			p0=p&0x0ff; p1=(p>>8)&0x0ff
-			p0=zero2(p0);p1=zero2(p1);
+			p0=p&0x0ff;
+			p1=(p>>8)&0x0ff
+			p0=zero2(p0);
+			p1=zero2(p1);
 			bas+=""+p1+p0+"\n";
 		}
 	}
@@ -483,11 +486,9 @@ function m2ar(lines,outlist){
 // from http://tagiyasoft.blog.jp/asm15.js
 function m2js(lines,outlist){
 	var p,p0,p1;
-	var bas="",i,line,out,nln;
+	var bas="",i,line,out;
 	var skips={undefined:true,LABEL:true,COMMENT:true,NOTOPCODE:true};
 	var lines2=[],linehex=[],lineadr=-1;
-
-	nln=10;
 	
 	for(i=0; i<outlist.length; i++){
 		out=outlist[i];
@@ -504,7 +505,8 @@ function m2js(lines,outlist){
 			if(lineadr<0){
 				lineadr=a;
 			}
-			p0=p&0x0ff; p1=(p>>8)&0x0ff
+			p0=p&0x0ff;
+			p1=(p>>8)&0x0ff
 			linehex.push(p0);
 			linehex.push(p1);
 		}
@@ -515,7 +517,6 @@ function m2js(lines,outlist){
 				+ linehex.length
 			);
 			linehex=[];
-			nln+=10;
 			lineadr=-1;
 		}
 	}
@@ -534,6 +535,49 @@ function m2js(lines,outlist){
 		+ lines2.join( ";\n" )
 		+ "return mem();\n"
 		+ "}\n";
+	return bas;
+}
+// for C lang
+function m2c(lines,outlist){
+	var p,p0,p1;
+	var bas="",i,line,out;
+	var skips={undefined:true,LABEL:true,COMMENT:true,NOTOPCODE:true};
+	var lines2=[],linehex=[],lineadr=-1;
+
+	for(i=0; i<outlist.length; i++){
+		out=outlist[i];
+		l=out[0];
+		a=out[1];
+		p=out[2];
+		line=lines[l];
+
+		if(p==EMPTYLINE){
+			continue;
+		}else if(p===undefined||p===null||p===false||p>=NOTOPCODE){
+			continue
+		}else{
+			if(lineadr<0){
+				lineadr=a;
+			}
+			p0=p&0x0ff;
+			p1=(p>>8)&0x0ff
+			linehex.push("0x" + zero16(p0));
+			linehex.push("0x" + zero16(p1));
+		}
+		if(linehex.length>=16){
+			lines2.push("\t" + linehex.join(", ") + ",");
+			linehex=[];
+			lineadr=-1;
+		}
+	}
+	if (linehex.length>0){
+		lines2.push("\t" + linehex.join(", "));
+	}
+	lines2.push("");
+
+	bas = "const char ASM[] = {\n" 
+		+ lines2.join("\n")
+		+ "};\n";
 	return bas;
 }
 
@@ -675,7 +719,9 @@ function gsb(d,pc) {
 
 var bas="";
 var outlist=[];
-var fmt_dict = { "bas2": m2b2, "bas16": m2b16, "bas10": m2b10, "basar": m2ar, "bin": m2bin, "latte": m2js };
+var fmt_dict = {
+	"bas2": m2b2, "bas16": m2b16, "bas10": m2b10, "basar": m2ar, "bin": m2bin, "latte": m2js, "c": m2c
+};
 function assemble() {
 	lbl_dict = {};
 	outlist = [];
