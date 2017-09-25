@@ -511,7 +511,7 @@ function m2js(lines,outlist){
 			linehex.push(p1);
 		}
 		if(linehex.length>=16){
-			lines2.push( "mem(a,"
+			lines2.push("\tmem(a,"
 				+ linehex.join(",")
 				+ ");a=a+"
 				+ linehex.length
@@ -520,20 +520,20 @@ function m2js(lines,outlist){
 			lineadr=-1;
 		}
 	}
-	if(linehex.length>0){
-		lines2.push( "mem(a,"
+	if (linehex.length>0) {
+		lines2.push("\tmem(a,"
 			+ linehex.join(",")
-			+ ");a=a+"
-			+ linehex.length
+//			+ ");a=a+"+ linehex.length
+			+ ")"
 		);
 
 	}
 	lines2.push("");
 
-	bas = "function asm(){\n" 
-		+ 'var a=mem(" ");\n'
+	bas = "function asm() {\n" 
+		+ '\tvar a=mem(" ");\n'
 		+ lines2.join( ";\n" )
-		+ "return mem();\n"
+		+ "\treturn mem();\n"
 		+ "}\n";
 	return bas;
 }
@@ -544,7 +544,7 @@ function m2c(lines,outlist){
 	var skips={undefined:true,LABEL:true,COMMENT:true,NOTOPCODE:true};
 	var lines2=[],linehex=[],lineadr=-1;
 
-	for(i=0; i<outlist.length; i++){
+	for (i=0; i<outlist.length; i++){
 		out=outlist[i];
 		l=out[0];
 		a=out[1];
