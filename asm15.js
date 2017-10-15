@@ -305,7 +305,7 @@ for (var i = 0; i < cmdlist.length; i++){
 	patlist.push(patfactory(cmdlist[i][0]));
 }
 function zero16(x){
-	var p=x.toString(16);
+	var p=x.toString(16).toUpperCase();
 	p="00".substr(0,2-p.length)+p;
 	return p;
 }
@@ -395,7 +395,7 @@ function m2b10(lines,outlist){
 			linehex.push(p1.toString(10));
 			
 			if (linehex.length == 40) {
-				lines2.push(nln.toString(10) + " POKE#" + lineadr.toString(16) + "," + linehex.join(","));
+				lines2.push(nln.toString(10) + " POKE#" + lineadr.toString(16).toUpperCase() + "," + linehex.join(","));
 				lineadr = -1;
 				linehex=[];
 				nln+=10;
@@ -403,7 +403,7 @@ function m2b10(lines,outlist){
 		}
 	}
 	if (linehex.length > 0) {
-		lines2.push(nln.toString(10) + " POKE#" + lineadr.toString(16)+","+linehex.join(","));
+		lines2.push(nln.toString(10) + " POKE#" + lineadr.toString(16).toUpperCase() +","+linehex.join(","));
 	}
 	lines2.push("");
 
@@ -431,7 +431,7 @@ function m2b2(lines, outlist){
 			p0 = zero2(p0);
 			p1 = zero2(p1);
 			var nln = i * 10 + 10;
-			bas += nln + " poke #" + a.toString(16) + ",`" + p0 + ",`" + p1+" :'" + line + "\n";
+			bas += nln + " POKE#" + a.toString(16).toUpperCase() + ",`" + p0 + ",`" + p1+" :'" + line + "\n";
 		}
 	}
 	return bas;
@@ -581,6 +581,57 @@ function m2c(lines,outlist){
 	return bas;
 }
 
+// for hex file
+function m2hex(lines,outlist){
+	var p,p0,p1;
+	var bas="",i,line,out;
+	var skips={undefined:true,LABEL:true,COMMENT:true,NOTOPCODE:true};
+	var lines2=[],linehex=[],lineadr=-1;
+	
+	var chk = 0;
+	for (i=0; i<outlist.length; i++){
+		out=outlist[i];
+		l=out[0];
+		a=out[1];
+		p=out[2];
+		line=lines[l];
+
+		if(p==EMPTYLINE){
+			continue;
+		}else if(p===undefined||p===null||p===false||p>=NOTOPCODE){
+			continue
+		}else{
+			if(lineadr<0){
+				lineadr=a;
+			}
+			p0=p&0x0ff;
+			p1=(p>>8)&0x0ff
+			linehex.push(zero16(p0));
+			linehex.push(zero16(p1));
+			chk -= p0 + p1;
+		}
+		if (linehex.length>=16){
+			var ad1 = lineadr >> 8;
+			var ad2 = lineadr & 0xff;
+			chk -= linehex.length + ad1 + ad2;
+			lines2.push(":" + zero16(0x10) + zero16(ad1) + zero16(ad2) + "00" + linehex.join("") + zero16(chk & 0xff));
+			chk = 0;
+			linehex=[];
+			lineadr=-1;
+		}
+	}
+	if (linehex.length > 0) {
+		var ad1 = lineadr >> 8;
+		var ad2 = lineadr & 0xff;
+		chk -= linehex.length + ad1 + ad2;
+		lines2.push(":" + zero16(linehex.length) + zero16(ad1) + zero16(ad2) + "00" + linehex.join("") + zero16(chk & 0xff));
+	}
+	lines2.push("");
+
+	bas = lines2.join("\n") + ":00000001FF\n";
+	return bas;
+}
+
 function getSize(lines, outlist){
 	var p,p0,p1;
 	var bas="",i,line,out,nln;
@@ -720,7 +771,7 @@ function gsb(d,pc) {
 var bas="";
 var outlist=[];
 var fmt_dict = {
-	"bas2": m2b2, "bas16": m2b16, "bas10": m2b10, "basar": m2ar, "bin": m2bin, "latte": m2js, "c": m2c
+	"bas2": m2b2, "bas16": m2b16, "bas10": m2b10, "basar": m2ar, "bin": m2bin, "latte": m2js, "c": m2c, "hex": m2hex
 };
 function assemble() {
 	lbl_dict = {};
