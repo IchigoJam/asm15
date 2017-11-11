@@ -678,15 +678,18 @@ function asmln(ln, prgctr) {
 
 }
 function pint(s) {
-//	try {
+	try {
 		var orgs = s;
+		var n = s.indexOf("'");
+		if (n >= 0) {
+			s = s.substring(0, n);
+		}
 		s = s.replace(/#/g,"0x").replace(/`/g,"0b")
 		return parseInt(eval(s));
-/*	} catch (e) {
+	} catch (e) {
 		alert("err: " + orgs);
 		return null;
 	}
-*/
 }
 
 function pdat(ln,pc){
@@ -700,7 +703,7 @@ function pdat(ln,pc){
 		start=4;
 	}
 	
-	ln=ln.replace(/#/g,"0x").replace(/\'/g,"0b")
+	ln=ln.replace(/#/g,"0x").replace(/`/g,"0b")
 	var dlist=ln.slice(start).split(",")
 	var i,d,ret=[];
 	var adr=0;
