@@ -127,9 +127,15 @@ function n(bits, s, ofs, div, align4) {
 			for (var i = 0; i < ret.length; i++) {
 				var lbl = ret[i];
 				if (lbl in lbl_dict) {
-					var ad = lbl_dict[lbl] - (pc & 0x0fffffffe);
-					if (align4 && ad % 4 == 2) { // 追加 r0=[sp+n] のとき (バグ修正)
-						ad += 2;
+					var adl = lbl_dict[lbl];
+					var ad = adl - (pc & 0x0fffffffe);
+					if (align4) { // 追加 r0=[sp+n] のとき (バグ修正)
+						if (adl % 4 == 2) {
+							ad += 2;
+						}
+						if (pc % 4 == 2) {
+							ad += 2;
+						}
 					}
 					rel = ad >> div; // 0x0fffffffc -> 0x0fffffffe
 //					alert(lbl_dict[lbl].toString(16) + " " + pc.toString(16) + " " + div + " " + ((pc & 0x0fffffffe)) + " " + lbl + " " + rel);
@@ -374,7 +380,7 @@ function m2b10(lines,outlist){
 
 	nln=10;
 	
-	for(i=0; i < outlist.length; i++){
+	for (i = 0; i < outlist.length; i++){
 		out=outlist[i];
 		l=out[0];
 		a=out[1];
@@ -810,7 +816,7 @@ function assemble() {
 			lbl_dict[cutComment(line)] = prgctr;
 			outlist.push([i,prgctr,LABEL]);
 			continue;
-		} else if (line.charAt(0)=="'"||line.slice(0,3)=="rem"){
+		} else if (line.charAt(0) == "'" || line.slice(0,3) == "rem"){
 			outlist.push([i,prgctr,COMMENT]);
 			continue;
 		} else if (line.slice(0,4) == "data") {
