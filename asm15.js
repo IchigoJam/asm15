@@ -292,11 +292,14 @@ var cmdlist = [
 ["wfi",0xbf30],
 ["nop",0],
 
+//["reg = ror ( reg , reg )",0x41c0,b(3,0),b(3,0),b(3,3)],
+//["ror ( reg , reg )",0x41c0,b(3,0),b(3,3)],
+//["reg >>> = reg",0x41c0,b(3,0),b(3,3)], // NG
+
 /*
 ["bic ( reg , reg )",0x4380,b(3,0),b(3,3)],
 ["reg = asr ( reg , n )",0x1000,b(3,0),b(3,3),b(5,6,0)],
 ["asr ( reg , reg )",0x4100,b(3,0),b(3,3)],
-["ror ( reg , reg )",0x41c0,b(3,0),b(3,3)],
 ["reg = rev ( reg )",0xba00,b(3,0),b(3,3)],
 //["reg = rev16 ( reg )",0xba40,b(3,0),b(3,3)],
 //["reg = revSH ( reg )",0xbac0,b(3,0),b(3,3)],
