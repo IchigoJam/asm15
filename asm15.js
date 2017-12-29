@@ -313,9 +313,10 @@ var patlist = [];
 for (var i = 0; i < cmdlist.length; i++){
 	patlist.push(patfactory(cmdlist[i][0]));
 }
-function zero16(x){
-	var p=x.toString(16).toUpperCase();
-	p="00".substr(0,2-p.length)+p;
+function zero16(x) {
+	x = x & 0xff;
+	var p = x.toString(16).toUpperCase();
+	p = "00".substr(0, 2 - p.length) + p;
 	return p;
 }
 function zero2(x){
@@ -641,6 +642,73 @@ function m2hex(lines,outlist){
 	return bas;
 }
 
+// for mot file
+function m2mot(lines, outlist) {
+	var p,p0,p1;
+	var bas="",i,line,out;
+	var skips={undefined:true,LABEL:true,COMMENT:true,NOTOPCODE:true};
+	var lines2=[],linehex=[],lineadr=-1;
+	var startadr = -1;
+	
+	var chk = 0;
+	for (i = 0; i < outlist.length; i++) {
+		out=outlist[i];
+		l=out[0];
+		a=out[1];
+		p=out[2];
+		line=lines[l];
+
+		if (p==EMPTYLINE) {
+			continue;
+		} else if (p===undefined||p===null||p===false||p>=NOTOPCODE) {
+			continue
+		} else {
+			if (lineadr < 0) {
+				if (startadr < 0)
+					startadr = a;
+				lineadr = a;
+			}
+			p0=p&0x0ff;
+			p1=(p>>8)&0x0ff
+			linehex.push(zero16(p0));
+			linehex.push(zero16(p1));
+			chk += p0 + p1;
+		}
+		if (linehex.length >= 16) {
+			var ad1 = (lineadr >> 24) & 0xff;
+			var ad2 = (lineadr >> 16) & 0xff;
+			var ad3 = (lineadr >> 8) & 0xff;
+			var ad4 = lineadr & 0xff;
+			chk += linehex.length + ad1 + ad2 + ad3 + ad4;
+			var len = linehex.length + 5;
+			lines2.push("S3" + zero16(len) + zero16(ad1) + zero16(ad2) + zero16(ad3) + zero16(ad4) + linehex.join("") + zero16(~chk));
+			chk = 0;
+			linehex=[];
+			lineadr=-1;
+		}
+	}
+	if (linehex.length > 0) {
+		var ad1 = (lineadr >> 24) & 0xff;
+		var ad2 = (lineadr >> 16) & 0xff;
+		var ad3 = (lineadr >> 8) & 0xff;
+		var ad4 = lineadr & 0xff;
+		chk += linehex.length + ad1 + ad2 + ad3 + ad4;
+		var len = linehex.length + 5;
+		lines2.push("S3" + zero16(len) + zero16(ad1) + zero16(ad2) + zero16(ad3) + zero16(ad4) + linehex.join("") + zero16(~chk));
+	}
+	var ad1 = (startadr >> 24) & 0xff;
+	var ad2 = (startadr >> 16) & 0xff;
+	var ad3 = (startadr >> 8) & 0xff;
+	var ad4 = startadr & 0xff;
+	var chk = 4 + ad1 + ad2 + ad3 + ad4; // dummy
+	lines2.push("S704" + zero16(ad1) + zero16(ad2) + zero16(ad3) + zero16(ad4) + zero16(~chk));
+	lines2.push("");
+
+	bas = lines2.join("\n");
+	return bas;
+}
+
+//
 function getSize(lines, outlist){
 	var p,p0,p1;
 	var bas="",i,line,out,nln;
@@ -783,7 +851,7 @@ function gsb(d,pc) {
 var bas="";
 var outlist=[];
 var fmt_dict = {
-	"bas2": m2b2, "bas16": m2b16, "bas10": m2b10, "basar": m2ar, "bin": m2bin, "latte": m2js, "c": m2c, "hex": m2hex
+	"bas2": m2b2, "bas16": m2b16, "bas10": m2b10, "basar": m2ar, "bin": m2bin, "latte": m2js, "c": m2c, "hex": m2hex, "mot": m2mot
 };
 function assemble() {
 	lbl_dict = {};
