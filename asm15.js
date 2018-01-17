@@ -470,7 +470,7 @@ function m2bin(lines,outlist){
 	}
 	return bas;
 }
-function m2ar(lines,outlist){
+function m2ar2(lines,outlist){
 	var p,p0,p1;
 	var bas="",i,line,out,nln;
 	var skips={undefined:true,LABEL:true,COMMENT:true,NOTOPCODE:true};
@@ -490,6 +490,42 @@ function m2ar(lines,outlist){
 			bas += "[" + n + "]=`" + zero2(p >> 8) + " " + zero2(p & 0xff) + " :'" + line + "\n";
 			n++;
 		}
+	}
+	return bas;
+}
+function m2ar16(lines,outlist) {
+	var p,p0,p1;
+	var bas="",i,line,out;
+	var skips={undefined:true,LABEL:true,COMMENT:true,NOTOPCODE:true};
+	var n = 0;
+	var linehex=[];
+	
+	var limit = 30;
+	var nln = 10;
+	for (var i = 0; i < outlist.length; i++) {
+		out=outlist[i];
+		l=out[0];
+		a=out[1];
+		p=out[2];
+		line=lines[l];
+
+		if(p==EMPTYLINE) {
+			continue;
+		} else if(p===undefined||p===null||p===false||p>=NOTOPCODE){
+		} else {
+			var hex = "000" + p.toString(16).toUpperCase();
+			linehex.push("#" + hex.substring(hex.length - 4));
+			
+			if (linehex.length == limit) {
+				bas += nln + " LET[" + n + "]," + linehex.join(",") + "\n";
+				n += linehex.length;
+				nln += 10;
+				linehex = [];
+			}
+		}
+	}
+	if (linehex.length > 0) {
+		bas += nln + " LET[" + n + "]," + linehex.join(",") + "\n";
 	}
 	return bas;
 }
@@ -851,7 +887,7 @@ function gsb(d,pc) {
 var bas="";
 var outlist=[];
 var fmt_dict = {
-	"bas2": m2b2, "bas16": m2b16, "bas10": m2b10, "basar": m2ar, "bin": m2bin, "latte": m2js, "c": m2c, "hex": m2hex, "mot": m2mot
+	"bas2": m2b2, "bas16": m2b16, "bas10": m2b10, "basar2": m2ar2, "basar16": m2ar16, "bin": m2bin, "latte": m2js, "c": m2c, "hex": m2hex, "mot": m2mot
 };
 function assemble() {
 	lbl_dict = {};
