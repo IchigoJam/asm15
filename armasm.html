@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset="utf-8">
-<title>Cortex-M0 Armマシン語表（抜粋）</title>
+<title>Cortex-M0 Armマシン語表 （asm15表記、抜粋）</title>
 <meta property="og:image" content="armasm.png">
 <link rel="apple-touch-icon" href="armasm.png"/>
 <script src=lib/maketable2.js></script>
@@ -63,7 +63,7 @@ Rd += Rm	0	1	0	0	0	1	0	0	Rd3	Rm				Rd2-0			1|3
 Rd = PC + u8	1	0	1	0	0	Rd			u8/4								1
 Rd -= u8	0	0	1	1	1	Rd			u8								1
 Rd = Rn - u3	0	0	0	1	1	1	1	u3			Rn			Rd			1
-Rd -= Rm	0	0	0	1	1	0	1	Rm			Rn			Rd			1
+Rd = Rn - Rm	0	0	0	1	1	0	1	Rm			Rn			Rd			1
 Rd = -Rm	0	1	0	0	0	0	1	0	0	1	Rm			Rd			1
 Rd *= Rm	0	1	0	0	0	0	1	1	0	1	Rm			Rd			1
 Rd = Rm &lt;&lt; u5	0	0	0	0	0	u5					Rm			Rd			1

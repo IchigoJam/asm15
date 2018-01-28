@@ -153,15 +153,16 @@ function n(bits, s, ofs, div, align4) {
 	}
 	return f;
 }
-function b(bits,s,ofs){
+function b(bits, s, ofs) {
 	//dat bit shift,ofs
-	ofs=(ofs!=undefined)?ofs:0;
-	var mask=Math.pow(2,bits)-1;
-	if(mask<1) mask=0;
-	var f=function(d,pc){
+	ofs = (ofs != undefined) ? ofs : 0;
+	var mask = Math.pow(2, bits) - 1;
+	if (mask < 1)
+		mask = 0;
+	var f = function(d, pc) {
 		//console.log(bits,s,ofs);
-		d=pint(d);
-		return (d&mask)<<s;
+		d = pint(d);
+		return (d & mask) << s;
 	}
 	return f;
 
@@ -172,7 +173,7 @@ function bl(bits,s,ofs){
 	var mask=Math.pow(2,bits)-1;
 	if (mask<1)
 		mask=0;
-	var f=function(d,pc){
+	var f = function(d,pc){
 //		console.log("d",d);
 		d={"":1,undefined:1,"w":0,"b":1}[d];
 		d=parseInt(d);
@@ -258,12 +259,19 @@ var cmdlist = [
 ["reg << = reg",0x4080,b(3,0),b(3,3)],
 ["reg >> = reg",0x40c0,b(3,0),b(3,3)],
 ["reg = - reg",0x4240,b(3,0),b(3,3)],
+["reg + = reg",0x4400,b(3,0),b(3,3)],
+["reg + = h",0x4580,b(3,0),b(3,3)],
+["h + = reg",0x4540,b(3,0),b(3,3)],
+["h + = h",0x45C0,b(3,0),b(3,3)],
 ["reg | = reg",0x4300,b(3,0),b(3,3)],
 ["reg * = reg",0x4340,b(3,0),b(3,3)],
 ["reg & = not reg",0x4380,b(3,0),b(3,3)],
 ["reg = not reg",0x43c0,b(3,0),b(3,3)],
 //cmp
 ["reg - reg",0x4280,b(3,0),b(3,3)],
+["reg - h",0x4540,b(3,0),b(3,3)],
+["h - reg",0x4580,b(3,0),b(3,3)],
+["h - h",0x45C0,b(3,0),b(3,3)],
 ["reg & reg",0x4200,b(3,0),b(3,3)],
 ["reg - n",0x2800,b(3,8),b(8,0)],
 //ret
@@ -272,7 +280,6 @@ var cmdlist = [
 ["h = h",0x46c0,b(3,0),b(3,3)],
 ["h = reg",0x4680,b(3,0),b(3,3)],
 ["reg = h",0x4640,b(3,0),b(3,3)],
-
 ["reg = reg",0x4600,b(3,0),b(3,3)],
 
 ["reg = pc + n",0xa000,b(3,8),n(8,0,-1,2)],
@@ -791,7 +798,7 @@ function asmln(ln, prgctr) {
 
 }
 function pint(s) {
-	try {
+//	try {
 		var orgs = s;
 		var n = s.indexOf("'");
 		if (n >= 0) {
@@ -799,10 +806,10 @@ function pint(s) {
 		}
 		s = s.replace(/#/g,"0x").replace(/`/g,"0b")
 		return parseInt(eval(s));
-	} catch (e) {
-		alert("err: " + orgs);
-		return null;
-	}
+//	} catch (e) {
+//		alert("err: " + orgs);
+//		return null;
+//	}
 }
 
 function pdat(ln,pc){
