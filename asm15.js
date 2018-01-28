@@ -68,14 +68,12 @@ var token_dict = {
 */
 };
 
-
-
 function patfactory(s) {
-    s = s.split(" ");
-    var p = ["^"];
-    for (var i = 0; i < s.length; i++){
-        p.push(token_dict[s[i].toLowerCase()]);
-    }
+	s = s.split(" ");
+	var p = [ "^" ];
+	for (var i = 0; i < s.length; i++) {
+		p.push(token_dict[s[i].toLowerCase()]);
+	}
 	p.push("$");
 	return RegExp(p.join(""));
 }
@@ -153,7 +151,7 @@ function n(bits, s, ofs, div, align4) {
 	}
 	return f;
 }
-function b(bits, s, ofs) {
+function b(bits, s, ofs, chk) {
 	//dat bit shift,ofs
 	ofs = (ofs != undefined) ? ofs : 0;
 	var mask = Math.pow(2, bits) - 1;
@@ -162,10 +160,17 @@ function b(bits, s, ofs) {
 	var f = function(d, pc) {
 		//console.log(bits,s,ofs);
 		d = pint(d);
+		if (chk) {
+			if (d & ~mask) {
+				throw "over!";
+			}
+		}
 		return (d & mask) << s;
 	}
 	return f;
-
+}
+function bu(bits, s, ofs) {
+	return b(bits, s, ofs, true);
 }
 function bl(bits,s,ofs){
 	//dat bit shift,ofs
@@ -194,27 +199,27 @@ function build_m(f, ar, pc) {
 			op = op | _op;
 		}
 	}
-	return 0x0ffff & op;
+	return 0xffff & op;
 }
 
-
 var cmdlist = [
-
 //label
 
 //jmp
 ["if 0 goto n",0xd000,n(8,0,-2,1)],
 ["if ! 0 goto n",0xd100,n(8,0,-2,1)],
-["goto h",0x4740,b(3,3)],
 ["goto reg",0x4700,b(3,3)],
+["goto h",0x4740,b(3,3)],
 ["call reg",0x4780,b(3,3)], // 追加
+["call h",0x47C0,b(3,3)], // 追加
 ["gosub reg",0x4780,b(3,3)],
+["gosub h",0x47C0,b(3,3)], // 追加 GOSUB == CALL
 ["goto n",0xe000,n(11,0,-2,1)], // div 2->1
 
 //sp
-["reg = sp + n",0xa800,b(3,8),b(8,0,0)],
-["reg = [ sp + n ] l",0x9800,b(3,8),b(8,0)],
-["[ sp + n ] l = reg",0x9000,b(8,0),b(3,8)],
+["reg = sp + n",0xa800,b(3,8),bu(8,0,0)],
+["reg = [ sp + n ] l",0x9800,b(3,8),bu(8,0)],
+["[ sp + n ] l = reg",0x9000,b(8,0),bu(3,8)],
 
 //memory
 
@@ -229,31 +234,31 @@ var cmdlist = [
 ["[ reg + reg ] l = reg",0x5000,b(3,3),b(3,6),b(3,0),bl(1,10,0)],
 //["[ reg + reg ] bl = reg",0x5000,b(3,3),b(3,6),b(3,0),bl(1,10,0)],
 
-["reg = [ reg + n ]",  0x7800,b(3,0),b(3,3),b(5,6,0)],
-["reg = [ reg + n ] w",0x8800,b(3,0),b(3,3),b(5,6,0)],
-["reg = [ reg + n ] l",0x6800,b(3,0),b(3,3),b(5,6,0)],
+["reg = [ reg + n ]",  0x7800,b(3,0),b(3,3),bu(5,6,0)],
+["reg = [ reg + n ] w",0x8800,b(3,0),b(3,3),bu(5,6,0)],
+["reg = [ reg + n ] l",0x6800,b(3,0),b(3,3),bu(5,6,0)],
 //["reg = [ reg + n ] bl",0x6800,b(3,0),b(3,3),b(5,6,0),bl(1,12,0)],
 ["reg = [ reg ]",  0x7800,b(3,0),b(3,3)],
 ["reg = [ reg ] w",0x8800,b(3,0),b(3,3)],
 ["reg = [ reg ] l",0x6800,b(3,0),b(3,3)],
 
-["[ reg + n ] = reg",   0x7000,b(3,3),b(5,6,0),b(3,0),bl(1,12,0)], // 追加
-["[ reg + n ] w = reg", 0x8000,b(3,3),b(5,6,0),b(3,0),bl(1,12,0)],
-["[ reg + n ] l = reg", 0x6000,b(3,3),b(5,6,0),b(3,0),bl(1,12,0)], // 追加
+["[ reg + n ] = reg",   0x7000,b(3,3),bu(5,6,0),b(3,0),bl(1,12,0)], // 追加
+["[ reg + n ] w = reg", 0x8000,b(3,3),bu(5,6,0),b(3,0),bl(1,12,0)],
+["[ reg + n ] l = reg", 0x6000,b(3,3),bu(5,6,0),b(3,0),bl(1,12,0)], // 追加
 //["[ reg + n ] bl = reg",0x6000,b(3,3),b(5,6,0),b(3,0),bl(1,12,0)],
 ["[ reg ] = reg",   0x7000,b(3,3),b(3,0),bl(1,12,0)],
 ["[ reg ] w = reg", 0x8000,b(3,3),b(3,0),bl(1,12,0)],
 ["[ reg ] l = reg", 0x6000,b(3,3),b(3,0),bl(1,12,0)],
 
 
-["reg + = n",0x3000,b(3,8),b(8,0)],
-["reg - = n",0x3800,b(3,8),b(8,0)],
-["reg = reg << n",0x0,b(3,0),b(3,3),b(5,6)],
-["reg = reg >> n",0x0800,b(3,0),b(3,3),b(5,6)],
+["reg + = n",0x3000,b(3,8),bu(8,0)],
+["reg - = n",0x3800,b(3,8),bu(8,0)],
+["reg = reg << n",0x0,b(3,0),b(3,3),bu(5,6)],
+["reg = reg >> n",0x0800,b(3,0),b(3,3),bu(5,6)],
 ["reg = reg + reg",0x1800,b(3,0),b(3,3),b(3,6)],
 ["reg = reg - reg",0x1a00,b(3,0),b(3,3),b(3,6)],
-["reg = reg + n",0x1c00,b(3,0),b(3,3),b(3,6)],
-["reg = reg - n",0x1e00,b(3,0),b(3,3),b(3,6)],
+["reg = reg + n",0x1c00,b(3,0),b(3,3),bu(3,6)],
+["reg = reg - n",0x1e00,b(3,0),b(3,3),bu(3,6)],
 ["reg & = reg",0x4000,b(3,0),b(3,3)],
 ["reg ^ = reg",0x4040,b(3,0),b(3,3)],
 ["reg << = reg",0x4080,b(3,0),b(3,3)],
@@ -273,7 +278,7 @@ var cmdlist = [
 ["h - reg",0x4580,b(3,0),b(3,3)],
 ["h - h",0x45C0,b(3,0),b(3,3)],
 ["reg & reg",0x4200,b(3,0),b(3,3)],
-["reg - n",0x2800,b(3,8),b(8,0)],
+["reg - n",0x2800,b(3,8),bu(8,0)],
 //ret
 ["ret",0x4770],
 //let
@@ -286,7 +291,7 @@ var cmdlist = [
 ["reg = label",0xa000,b(3,8),n(8,0,-1,2,1)], // align4
 ["reg = [ n ] l",0x4800,b(3,8,0),n(8,0,-1,2,1)], // align4
 
-["reg = n",0x2000,b(3,8),b(8,0,0)],
+["reg = n",0x2000,b(3,8),bu(8,0,0)],
 ["push rlist",0xb400,rlist()],
 ["pop rlist",0xbc00,rlist()],
 
