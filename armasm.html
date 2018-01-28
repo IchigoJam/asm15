@@ -139,8 +139,8 @@ CALL n24 &lt;&lt; 1	1	1	1	1	0	S	n24(20-11)										-
 <script>
 makeTable("t1479b", function() {/*
 スタック	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles
-PUSH regs	1	0	1	1	0	1	0	LR	R7	R6	R5	R4	R3	R2	R1	R0	1+N
-POP regs	1	0	1	1	1	1	0	PC	R7	R6	R5	R4	R3	R2	R1	R0	1|4+N
+PUSH {regs}	1	0	1	1	0	1	0	LR	R7	R6	R5	R4	R3	R2	R1	R0	1+N
+POP {regs}	1	0	1	1	1	1	0	PC	R7	R6	R5	R4	R3	R2	R1	R0	1|4+N
 SP += u7	1	0	1	1	0	0	0	0	0	u7/4							1
 SP -= u7	1	0	1	1	0	0	0	0	1	u7/4							1
 Rd = SP + u8	1	0	1	0	1	Rd			u8/4								1
@@ -175,8 +175,8 @@ Rd = sbc(Rd, Rm)	0	1	0	0	0	0	0	1	1	0	Rm			Rd			1
 <script>
 makeTable("t1479d", function() {/*
 マルチメモリアクセス	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles
-LDM Rn, regs	1	1	0	0	1	Rn			R7	R6	R5	R4	R3	R2	R1	R0	1+N
-STM Rn, regs	1	1	0	0	0	Rn			R7	R6	R5	R4	R3	R2	R1	R0	1+N
+LDM Rn, {regs}	1	1	0	0	1	Rn			R7	R6	R5	R4	R3	R2	R1	R0	1+N
+STM Rn, {regs}	1	1	0	0	0	Rn			R7	R6	R5	R4	R3	R2	R1	R0	1+N
 */})
 </script>
 ※LDM: アドレスRnからregsの小さいレジスタから順に読み込みRnを進める 例）LDM R0,{R1,R2}<br>
