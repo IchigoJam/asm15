@@ -394,7 +394,7 @@ function m2b10(lines,outlist){
 	var skips={undefined:true,LABEL:true,COMMENT:true,NOTOPCODE:true};
 	var lines2=[],linehex=[],lineadr=-1;
 
-	nln=10;
+	nln = 10;
 	
 	for (i = 0; i < outlist.length; i++){
 		out=outlist[i];
@@ -416,8 +416,10 @@ function m2b10(lines,outlist){
 			linehex.push(p0.toString(10));
 			linehex.push(p1.toString(10));
 			
-			if (linehex.length == 40) {
-				lines2.push(nln.toString(10) + " POKE#" + lineadr.toString(16).toUpperCase() + "," + linehex.join(","));
+			var ln = nln.toString(10) + " POKE#" + lineadr.toString(16).toUpperCase() + "," + linehex.join(",");
+			if (ln.length > 200 - 7) {
+//			if (linehex.length == 40) {
+				lines2.push(ln);
 				lineadr = -1;
 				linehex=[];
 				nln+=10;
