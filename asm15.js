@@ -157,6 +157,7 @@ function b(bits, s, ofs, chk) {
 	var mask = Math.pow(2, bits) - 1;
 	if (mask < 1)
 		mask = 0;
+//console.log(bits,s,ofs);
 	var f = function(d, pc) {
 		//console.log(bits,s,ofs);
 		d = pint(d);
@@ -251,8 +252,6 @@ var cmdlist = [
 ["[ reg ] l = reg", 0x6000,b(3,3),b(3,0),bl(1,12,0)],
 
 
-["reg + = n",0x3000,b(3,8),bu(8,0)],
-["reg - = n",0x3800,b(3,8),bu(8,0)],
 ["reg = reg << n",0x0,b(3,0),b(3,3),bu(5,6)],
 ["reg = reg >> n",0x0800,b(3,0),b(3,3),bu(5,6)],
 ["reg = reg + reg",0x1800,b(3,0),b(3,3),b(3,6)],
@@ -265,13 +264,15 @@ var cmdlist = [
 ["reg >> = reg",0x40c0,b(3,0),b(3,3)],
 ["reg = - reg",0x4240,b(3,0),b(3,3)],
 ["reg + = reg",0x4400,b(3,0),b(3,3)],
-["reg + = h",0x4580,b(3,0),b(3,3)],
-["h + = reg",0x4540,b(3,0),b(3,3)],
-["h + = h",0x45C0,b(3,0),b(3,3)],
+["reg + = h",0x4440,b(3,0),b(3,3)],
+["h + = reg",0x4480,b(3,0),b(3,3)],
+["h + = h",0x44C0,b(3,0),b(3,3)],
 ["reg | = reg",0x4300,b(3,0),b(3,3)],
 ["reg * = reg",0x4340,b(3,0),b(3,3)],
 ["reg & = not reg",0x4380,b(3,0),b(3,3)],
 ["reg = not reg",0x43c0,b(3,0),b(3,3)],
+["reg + = n",0x3000,b(3,8),bu(8,0)],
+["reg - = n",0x3800,b(3,8),bu(8,0)],
 //cmp
 ["reg - reg",0x4280,b(3,0),b(3,3)],
 ["reg - h",0x4540,b(3,0),b(3,3)],
@@ -417,7 +418,7 @@ function m2b10(lines,outlist){
 			linehex.push(p1.toString(10));
 			
 			var ln = nln.toString(10) + " POKE#" + lineadr.toString(16).toUpperCase() + "," + linehex.join(",");
-			if (ln.length > 200 - 7) {
+			if (ln.length > 200 - 8) {
 //			if (linehex.length == 40) {
 				lines2.push(ln);
 				lineadr = -1;
@@ -954,7 +955,7 @@ function assemble() {
 			try {
 				p = asmln(line, prgctr);
 				
-				outlist.push([i, prgctr, p]);
+				outlist.push([ i, prgctr, p ]);
 				if (p != undefined) {
 					prgctr += 2;
 				} else if (line.slice(0,4) == "call" || line.slice(0,5) == "gosub") {
