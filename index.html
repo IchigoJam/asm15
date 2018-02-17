@@ -6,6 +6,9 @@
 <script src="asm15output.js"></script>
 <!--<script src="asm15_example.js"></script>-->
 <style>
+body {
+	font-family: sans-serif;
+}
 li {
 	padding: 0.5em;
 }
@@ -67,13 +70,14 @@ window.onload = function() {
 <textarea id="textarea2" style="width:80%;height:15em;word-break: break-all;"></textarea>
 </div>
 
-<h3>IchigoJam マシン語解説ページ</h3>
+<h3>IchigoJam Armマシン語解説ページ</h3>
 <div>
 <ul>
-<li><a href="armasm.html">Cortex-M0 ARMマシン語表（抜粋）</a></li>
-<li><a href="http://fukuno.jig.jp/app/IchigoJam/cpuemu.html">IchigoJam マシン語エミュレーター on Web</a><br>
+<li>参考<br>
+<a href="armasm.html">Cortex-M0 ARMマシン語表（抜粋）</a><br>
+<a href="http://fukuno.jig.jp/app/IchigoJam/cpuemu.html">IchigoJam マシン語エミュレーター on Web</a><br>
 2進数表記(binary)をコピペして動かせます (<a href="http://fukuno.jig.jp/1328">説明</a>)</li>
-<li><a href="http://fukuno.jig.jp/1748">マシン語で赤外線リモコン機能を追加してレゴのロボットを制御（応用例）</a></li>
+</li>
 <li>連載、IchigoJamではじめる、ARMマシン語入門<br>
 <a href=http://fukuno.jig.jp/1184>1. はじめてのマシン語</a><br>
 <a href=http://fukuno.jig.jp/1186>2. ハンドアセンブルで超速計算！</a><br>
@@ -87,79 +91,17 @@ window.onload = function() {
 <a href=http://fukuno.jig.jp/1872>10. マシン語を制するもの時間を制す</a><br>
 <a href=http://fukuno.jig.jp/1889>11. 画面をイチゴで埋め尽くす12の方法</a><br>
 </li>
+<li>応用例<br>
+<a href="http://fukuno.jig.jp/1748">マシン語で赤外線リモコン機能を追加してレゴのロボットを制御</a><br>
+<a href="http://fukuno.jig.jp/2018">FFF?40F?16進数3桁で色を決めよう、WS2812BのIchigoJam用マシン語ドライバで電光掲示！</a><br>
+<a href="http://fukuno.jig.jp/2022">IchigoJamの画面からダイレクトであやつる、256色カラー32x8電光掲示板！Armマシン語ジグザグドライバ for WS2812B</a><br>
+</li>
 </ul>
 
 </div>
-<h3>更新</h3>
-<div>
-まだおかしなところはあるかもしれません（値の範囲判定をしてないので注意）
-<ul>
 
-<li><a href="http://fukuno.jig.jp/1880">2017/09/16</a><br>
-
-GOSUB→CALL(GOSUBも可)<br>
-符号付きメモリアクセスに（Rd = [Rn + Rm]C / Rd = [Rn + Rm]S）に対応（<a href=http://fukuno.jig.jp/app/IchigoJam/armasm.html>マシン語表</a>）<br>
-IchigoLatte用出力を追加 (Thank to <a href=http://tagiyasoft.blog.jp/asm15.js>tagiyasoft</a>)<br>
-DATA表記の4byteアラインずれの修正<br>
-Rd = [PC + n]L と、L付き表記に変更<br>
-</li>
-
-<li><a href="http://fukuno.jig.jp/">2017/05/16</a><br> 
-GOSUB、レジスタ、ラベル両対応<br>
-ブログ内のアセンブリ言語をこのアセンブラと合わせる（<a href=http://fukuno.jig.jp/1757>アセンブラをつかおう</a>）<br>
-by <a href=http://fukuno.jig.jp/>fukuno.jig.jp</a> (Thank to <a href=http://d.hatena.ne.jp/boxheadroom/20160306>BoxHeadRoom</a>)
-</li>
-
-<li><a href="http://fukuno.jig.jp/">2017/05/07</a><br> 
-GOSUBのアドレス位置調整<br>
-メモリ読み書きの表記方法変更 （[Rd+u]W=reg など）<br>
-CPSID/CPSIE/NOP/WFI追加<br>
-書き出し方法に10進数POKE文/配列形式追加<br>
-ラベル未定義でエラーがでるように<br>
-by <a href=http://fukuno.jig.jp/>fukuno.jig.jp</a> (Thank to <a href=http://d.hatena.ne.jp/boxheadroom/20160306>BoxHeadRoom</a>)
-</li>
-
-<li><a href="http://boxheadroom.com/15/old/20160513.zip">2016/05/13</a><br> 
-R0=[R1+R2] W <br>
-[R0+R1]=R2 W <br>
-で16bit読み書き
-</li>
-
-<li><a href="http://boxheadroom.com/15/old/20160403.zip">2016/04/03</a><br> 
-PUSH POP GOSUB  GOTO Rn  などの命令<br>
-サンプルコード表示、先頭アドレス指定<br>
-16進表記<br></li>
-
-<li><a href="http://boxheadroom.com/15/old/20160329.zip">2016/03/29</a><br> 
-出力欄上のプルダウンでbinaryを選ぶと、16bitづつ 2進数表記で出力。<br>
-<br>
-Rn = [ @label ] でPC相対ロード(32bit) @label番地の内容をレジスタへ。<br>
-アドレスが４の倍数(下一桁が0 4 8 C )になるようにdataなどで調整してください
-<br><br>
-
-Rn = PC+@label @labelの実アドレスをRnへ。<br>
-(省略形 Rn = @label) <br><br>
-[R0+0]=R1 L など　ロードセーブ系の末尾にLを付けると32bit転送<br> 
-Wで16bit 　Bまたは何も付けないと8bit転送<br>
-<br>
-data  0,1,2,3,... で8bitデータ埋め込み<br>
-data L 0,1,2,3,... で32bit<br>
-data W 0,1,2,3,... で16bit<br>
-
-</li>
-<li><a href="http://boxheadroom.com/15/old/20160320.zip">2016/03/20</a>　goto系でラベルを使えるように</li>
-</ul>
-</div>
-
-<div>
-<h3>License</h3>
-<a href="https://creativecommons.org/publicdomain/zero/1.0/deed.ja">CC0 パブリックドメイン</a>
-<ul>
-<li><a href="index.html">index.html</a>（このファイル）</li>
-<li><a href="asm15.js">asm15.js</a>（アセンブラJavaScriptプログラム）</li>
-</ul>
-</div>
-App: by <a href=http://d.hatena.ne.jp/boxheadroom/20160306>BoxHeadRoom</a> / <a href=http://tagiyasoft.blog.jp/archives/6538415.html>tagiyasoft</a> / <a href=http://fukuno.jig.jp/>fukuno.jig.jp</a><br>
+Base App: by <a href=http://d.hatena.ne.jp/boxheadroom/20160306>BoxHeadRoom</a> / <a href=http://tagiyasoft.blog.jp/archives/6538415.html>tagiyasoft</a> / <a href=http://fukuno.jig.jp/>fukuno.jig.jp</a><br>
 Src on <a href=https://github.com/IchigoJam/asm15/>GitHub@IchigoJam</a><br>
+License: <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.ja">CC0 パブリックドメイン</a><br>
 
 </body></html>
