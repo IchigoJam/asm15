@@ -40,14 +40,14 @@ a {
 </style>
 </head><body>
 
-<h1>Cortex-M0 Armマシン語表 （asm15表記、抜粋）</h1>
+<h1>Cortex-M0 Armマシン語表 （asm15、抜粋）</h1>
 
 <table id="t1188a" class=tarmasm></table>
 <script>
 makeTable("t1188a", function() {/*
 代入	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles
 Rd = u8	0	0	1	0	0	Rd			u8								1
-Rd = Rm	0	1	0	0	0	1	1	0	Rd3	Rm				Rd2-0			1|3
+Rd = Rm	0	1	0	0	0	1	1	0	Rd3	Rm				Rd2-0			1,3
 */})
 </script>
 ※Rd3とRd2-0の4bitでRdを指定する、RdがPCの時3cycles
@@ -58,8 +58,8 @@ makeTable("t1188b", function() {/*
 演算	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles
 Rd += u8	0	0	1	1	0	Rd			u8								1
 Rd -= u8	0	0	1	1	1	Rd			u8								1
-Rd = PC + u8	1	0	1	0	0	Rd			u8/4								1
-Rd += Rm	0	1	0	0	0	1	0	0	Rd3	Rm				Rd2-0			1|3
+Rd = PC + u8	1	0	1	0	0	Rd			u8								1
+Rd += Rm	0	1	0	0	0	1	0	0	Rd3	Rm				Rd2-0			1,3
 Rd = Rn + u3	0	0	0	1	1	1	0	u3			Rn			Rd			1
 Rd = Rn - u3	0	0	0	1	1	1	1	u3			Rn			Rd			1
 Rd = Rn + Rm	0	0	0	1	1	0	0	Rm			Rn			Rd			1
@@ -76,7 +76,8 @@ Rd |= Rm	0	1	0	0	0	0	1	1	0	0	Rm			Rd			1
 Rd ^= Rm	0	1	0	0	0	0	0	0	0	1	Rm			Rd			1
 */})
 </script>
-※Rd3とRd2-0の4bitでRdを指定する、Rd=PCの時3cycles
+※Rd3とRd2-0の4bitでRdを指定する、Rd=PCの時3cycles<br>
+※Rd=PC+u8: u8は4byte単位<br>
 
 <table id="t1479a" class=tarmasm></table>
 <script>
@@ -119,9 +120,9 @@ Rn &amp; Rm	0	1	0	0	0	0	1	0	0	0	Rm			Rn			1
 <script>
 makeTable("t1188d", function() {/*
 分岐	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles
-IF 0 GOTO n8	1	1	0	1	0	0	0	0	n8								1|3
-IF !0 GOTO n8	1	1	0	1	0	0	0	1	n8								1|3
-IF cond GOTO n8	1	1	0	1	cond				n8								1|3
+IF 0 GOTO n8	1	1	0	1	0	0	0	0	n8								1,3
+IF !0 GOTO n8	1	1	0	1	0	0	0	1	n8								1,3
+IF cond GOTO n8	1	1	0	1	cond				n8								1,3
 GOTO n11	1	1	1	0	0	n11											3
 GOTO Rm	0	1	0	0	0	1	1	1	0	Rm				0	0	0	3
 GOSUB Rm	0	1	0	0	0	1	1	1	1	Rm				0	0	0	3
@@ -135,15 +136,15 @@ CALL n24 &lt;&lt; 1	1	1	1	1	0	S	n24(20-11)										-
 -	1	1	J1	1	J2	n24(10-0)											4
 */
 </script>
-※指定する値(n8,n11,n22)は飛び先との命令数の差分から-2した数を指定、分岐するとき3cycles<br>
-※cond = 0-14 (EQ, NE, CS, CC, MI, PL, VS, VC, HI, LS, GE, LT, GT, LE, AL) !を付けて否定<br>
+※n8/n11/n22:飛び先との命令数の差分から-2した数を指定、分岐するとき3cycles<br>
+※cond:0-14 (EQ, NE, CS, CC, MI, PL, VS, VC, HI, LS, GE, LT, GT, LE, AL) !を付けて否定<br>
 
 <table id="t1479b" class=tarmasm></table>
 <script>
 makeTable("t1479b", function() {/*
 スタック	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles
 PUSH {regs}	1	0	1	1	0	1	0	LR	R7	R6	R5	R4	R3	R2	R1	R0	1+N
-POP {regs}	1	0	1	1	1	1	0	PC	R7	R6	R5	R4	R3	R2	R1	R0	1|4+N
+POP {regs}	1	0	1	1	1	1	0	PC	R7	R6	R5	R4	R3	R2	R1	R0	1,4 +N
 SP += u7	1	0	1	1	0	0	0	0	0	u7							1
 SP -= u7	1	0	1	1	0	0	0	0	1	u7							1
 Rd = SP + u8	1	0	1	0	1	Rd			u8								1
@@ -151,9 +152,9 @@ Rd = [SP + u8]L	1	0	0	1	1	Rd			u8								2
 [SP + u8]L = Rd	1	0	0	1	0	Rd			u8								2
 */})
 </script>
-※u7/u8: 4byte単位<br>
-※PUSH: SPへregsの大きいレジスタから順に積みSPを減らす 例）PUSH {R1,R2}<br>
-※POP: SPからregsの小さいレジスタから順に読み込みSPを増やす 例）POP {R1,R2}<br>
+※u7/u8:4byte単位<br>
+※PUSH:SPへregsの大きいレジスタから順に積みSPを減らす 例）PUSH {R1,R2}<br>
+※POP:SPからregsの小さいレジスタから順に読み込みSPを増やす 例）POP {R1,R2}<br>
 ※N:指定したレジスタの数、PCへPOPした場合4+Ncycles（それ以外は1+Ncycles）<br>
 
 <table id="t1188b2" class=tarmasm></table>
@@ -184,8 +185,8 @@ STM Rn, {regs}	1	1	0	0	0	Rn			R7	R6	R5	R4	R3	R2	R1	R0	1+N
 */})
 </script>
 ※N:指定したレジスタの数（マルチメモリアクセス）<br>
-※LDM: アドレスRnからregsの小さいレジスタから順に読み込みRnを進める 例）LDM R0,{R1,R2}<br>
-※STM: アドレスRnへregsの小さいレジスタから順に書き込みRnを進める 例）LDM R0,{R1,R2}<br>
+※LDM:アドレスRnからregsの小さいレジスタから順に読み込みRnを進める 例）LDM R0,{R1,R2}<br>
+※STM:アドレスRnへregsの小さいレジスタから順に書き込みRnを進める 例）LDM R0,{R1,R2}<br>
 
 <table id="t1479c" class=tarmasm></table>
 <script>
@@ -197,9 +198,8 @@ CPSIE (=#B662)	1	0	1	1	0	1	1	0	0	1	1	0	0	0	1	0	1
 WFI (=#BF30)	1	0	1	1	1	1	1	1	0	0	1	1	0	0	0	0	2
 */})
 </script>
-※CPSID:割込禁止、CPSIE:割込許可、WFI:割込待ち、NOP:なにもしない(no operation) R0=R0<<0
+※CPSID:割込禁止、CPSIE:割込許可、WFI:割込待ち、NOP:なにもしない(no operation) R0=R0&lt;&lt;0<br>
 
-		<br>
 <!--
 todo
 分岐の種類を増やす
