@@ -153,8 +153,8 @@ Rd = [SP + u8]L	1	0	0	1	1	Rd			u8								2
 */})
 </script>
 ※u7/u8:4byte単位<br>
-※PUSH:SPへregsの大きいレジスタから順に積みSPを減らす 例）PUSH {R1,R2}<br>
-※POP:SPからregsの小さいレジスタから順に読み込みSPを増やす 例）POP {R1,R2}<br>
+※PUSH:regsの大きいレジスタから順に、SPを減らしSPへ積む 例）PUSH {R1,R2}<br>
+※POP:regsの小さいレジスタから順に、SPから読み込みSPを増やす 例）POP {R1,R2}<br>
 ※N:指定したレジスタの数、PCへPOPした場合4+Ncycles（それ以外は1+Ncycles）<br>
 
 <table id="t1188b2" class=tarmasm></table>
@@ -247,6 +247,7 @@ todo
 <a href=http://fukuno.jig.jp/1849>9. マシン語で高速SPI</a><br>
 <a href=http://fukuno.jig.jp/1872>10. マシン語を制するもの時間を制す</a><br>
 <a href=http://fukuno.jig.jp/1889>11. 画面をイチゴで埋め尽くす12の方法</a><br>
+<a href=http://fukuno.jig.jp/2035>12. レジスタ不足に上位レジスタとスタック操作</a><br>
 <!--
 クロックを意識して特殊演算
 	4byte rotate
