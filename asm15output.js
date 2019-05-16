@@ -308,7 +308,7 @@ function m2c(lines,outlist){
 	}
 	lines2.push("");
 
-	bas = "const char ASM[] = {\n" 
+	bas = "static const char ASM[] = {\n" 
 		+ lines2.join("\n")
 		+ "};\n";
 	return bas;
