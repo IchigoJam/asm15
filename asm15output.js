@@ -308,7 +308,7 @@ function m2c(lines,outlist){
 	}
 	lines2.push("");
 
-	bas = "static const char ASM[] = {\n" 
+	bas = "__attribute__ ((aligned(2))) static const char ASM[] = {\n" 
 		+ lines2.join("\n")
 		+ "};\n";
 	return bas;
