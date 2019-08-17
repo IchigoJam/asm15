@@ -191,21 +191,35 @@ STM Rn, {regs}	1	1	0	0	0	Rn			R7	R6	R5	R4	R3	R2	R1	R0	1+N
 <table id="t1479c" class=tarmasm></table>
 <script>
 makeTable("t1479c", function() {/*
+符号拡張	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles
+Rd = SXTH(Rm)	1	0	1	1	0	0	1	0	0	0	Rm			Rd			1
+Rd = SXTB(Rm)	1	0	1	1	0	0	1	0	0	1	Rm			Rd			1
+Rd = UXTH(Rm)	1	0	1	1	0	0	1	0	1	0	Rm			Rd			1
+Rd = UXTB(Rm	1	0	1	1	0	0	1	0	1	1	Rm			Rd			1
+*/})
+</script>
+※ SXTH(16→32bit shortへのキャスト)、SXTB(8→32bit charへのキャスト)、UXTH(16→32bit、ゼロ拡張)、UXTB(8→32bit、ゼロ拡張）
+
+<table id="t1479e" class=tarmasm></table>
+<script>
+makeTable("t1479e", function() {/*
 その他	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles
 NOP (=0)	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1
 CPSID (=#B672)	1	0	1	1	0	1	1	0	0	1	1	1	0	0	1	0	1
 CPSIE (=#B662)	1	0	1	1	0	1	1	0	0	1	1	0	0	0	1	0	1
 WFI (=#BF30)	1	0	1	1	1	1	1	1	0	0	1	1	0	0	0	0	2
+YIELD	1	0	1	1	1	1	1	1	0	0	0	1	0	0	0	0	1
+WFE	1	0	1	1	1	1	1	1	0	0	1	0	0	0	0	0	2
+SEV	1	0	1	1	1	1	1	1	0	1	0	0	0	0	0	0	1
+SVC	1	1	0	1	1	1	1	1	u8								-
+BKPT	1	0	1	1	1	1	1	0	u8								-
 */})
 </script>
-※CPSID:割込禁止、CPSIE:割込許可、WFI:割込待ち、NOP:なにもしない(no operation) R0=R0&lt;&lt;0<br>
+※CPSID:割込禁止、CPSIE:割込許可、WFI:割込待ち、NOP:なにもしない(no operation) R0=R0&lt;&lt;0、SVC スーパーバイザーコール<br>
 
 <!--
 todo
 分岐の種類を増やす
-
-		符号拡張を追加
-		SXTB(8), SXTH(16), UXTB(8), UXTH(16) -- extend to 32bit
 		
 		データバリアを追加
 		DMB(t2), DSB(t2), ISB(t2) -- data barrier
@@ -214,20 +228,6 @@ todo
 		MRS(t2) 特殊アドレス読込, MSR(t2) 特殊アドレスへ書き込み
 			APSR IAPSR EAPSR XPSR IPSR EPSR IEPSR MSP PSP PRIMASK CONTROL
 		
-		その他命令
-		デバッグ用
-		BKPT -- break point
-		スーパーバイザーコール（割込？）
-		SVC -- supervisor call
-
-		YIELD, 
-		
-		SEV -- send event
-		WFE -- wait for event
-		
-		CPS -- change processor state CPSID/CPSIE
-		WFI -- wait for interrupt
-		NOP, 
 -->
 </p><p>
 - マシン語関連ツール<br>
