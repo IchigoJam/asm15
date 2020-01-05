@@ -58,26 +58,34 @@ Rd = Rm	1	0	0	0	Rd					Rm					1	0	1	c.mv
 makeTable("t1188b", function() {/*
 演算	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles	op
 Rd += n6	0	0	0	n5	Rd					n4-0					0	1	1	c.addi
+Rd &lt;&lt;= u6	0	1	0	u5	Rd					u4-0					1	0	1	c.slli
 Rd += Rm	1	0	0	1	Rd					Rm					1	0	1	c.add
+Rd' &gt;&gt;= u6	1	0	0	u5	0	0	Rd'			u4-0					0	1	1	c.srli
+Rd' &gt;&gt;&gt;= u6	1	0	0	u5	0	1	Rd'			u4-0					0	1	1	c.srai
+Rd' &amp;= n6	1	0	0	n5	1	0	Rd'			n4-0					0	1	1	c.andi
 Rd' = -Rm'	1	0	0	0	1	1	Rd'			0	0	Rm'			0	1	1	c.sub
+Rd' ^= Rm'	1	0	0	0	1	1	Rd'			0	1	Rm'			0	1	1	c.xor
+Rd' |= Rm'	1	0	0	0	1	1	Rd'			1	0	Rm'			0	1	1	c.or
+Rd' &amp;= Rm'	1	0	0	0	1	1	Rd'			1	1	Rm'			0	1	1	c.and
+*/})
+</script>
+※Rd' = R(d+8) (3bitでR8-R15を指定)<br>
+※ &gt;&gt; : 符号なし右シフト、&gt;&gt;&gt; : 符号付き右シフト<br>
+
+<table id="t1188c" class=tarmasm></table>
+<script>
+makeTable("t1188c", function() {/*
+M拡張演算	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles	op
 Rd = Rm * Rs	Rm0	0	0	0	Rd					0	1	1	0	0	1	1	1	mul
 	0	0	0	0	0	0	1	Rs					Rm4-1				-	-
 Rd = Rm / Rs	Rm0	1	0	0	Rd					0	1	1	0	0	1	1	?	div
 	0	0	0	0	0	0	1	Rs					Rm4-1				-	-
 Rd = Rm % Rs	Rm0	1	1	0	Rd					0	1	1	0	0	1	1	?	rem
 	0	0	0	0	0	0	1	Rs					Rm4-1				-	-
-Rd &lt;&lt;= u6	0	1	0	u5	Rd					u4-0					1	0	1	c.slli
-Rd' &gt;&gt;&gt;= u6	1	0	0	u5	0	0	Rd'			u4-0					0	1	1	c.srli
-Rd' &gt;&gt;= u6	1	0	0	u5	0	1	Rd'			u4-0					0	1	1	c.srai
-Rd' &amp;= n6	1	0	0	n5	1	0	Rd'			n4-0					0	1	1	c.andi
-Rd' &amp;= Rm'	1	0	0	0	1	1	Rd'			1	1	Rm'			0	1	1	c.and
-Rd' |= Rm'	1	0	0	0	1	1	Rd'			1	0	Rm'			0	1	1	c.or
-Rd' ^= Rm'	1	0	0	0	1	1	Rd'			0	1	Rm'			0	1	1	c.xor
 */})
 </script>
-※Rd' = R(d+8) (3bitでR8-R15を指定)<br>
-※&gt;&gt;&gt; : 符号なし右シフト、&gt;&gt; : 符号付き右シフト<br>
 ※mul/div/remにC命令なし、mulh,mulhsu,mulhu,divu,remuもある<br>
+
 <!--
 	Armから無い
 ?Rd = PC + u8	1	0	1	0	0	Rd			u8								1
