@@ -90,8 +90,8 @@ Rd' ^= Rm'	1	0	0	0	1	1	Rd'			0	1	Rm'			0	1	1	c.xor
 <script>
 makeTable("t1479a", function() {/*
 メモリアクセス	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles	op
-Rd' = [Rn' + u7]L	0	1	0	u5-3		Rn'			u2	u6	Rd'				0	0	?	c.lw
-[Rn' + u7]L = Rd'	1	1	0	u5-3		Rn'			u2	u6	Rd'				0	0	?	c.lw
+Rd' = [Rn' + u7]L	0	1	0	u5-3			Rn'			u2	u6	Rd'			0	0	?	c.lw
+[Rn' + u7]L = Rd'	1	1	0	u5-3			Rn'			u2	u6	Rd'			0	0	?	c.sw
 */})
 </script>
 ※[]後の記号でメモリサイズと符号を表す（W:2byte、L:4byte、C:符号付き1byte、S:符号付き2byte）<br>
