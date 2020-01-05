@@ -58,7 +58,7 @@ Rd = Rm	1	0	0	0	Rd					Rm					1	0	1	c.mv
 makeTable("t1188b", function() {/*
 演算	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles	op
 Rd += n6	0	0	0	n5	Rd					n4-0					0	1	1	c.addi
-Rd &lt;&lt;= u6	0	1	0	u5	Rd					u4-0					1	0	1	c.slli
+Rd &lt;&lt;= u6	0	0	0	u5	Rd					u4-0					1	0	1	c.slli
 Rd += Rm	1	0	0	1	Rd					Rm					1	0	1	c.add
 Rd' &gt;&gt;= u6	1	0	0	u5	0	0	Rd'			u4-0					0	1	1	c.srli
 Rd' &gt;&gt;&gt;= u6	1	0	0	u5	0	1	Rd'			u4-0					0	1	1	c.srai
@@ -128,9 +128,9 @@ CALL n24 &lt;&lt; 1	1	1	1	1	0	S	n24(20-11)										-
 <script>
 makeTable("t1479b", function() {/*
 スタック	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles	op
-PUSH Rs,n8	1	1	0	n5-2				n7-6		Rs					1	0	?	c.swsp
-POP Rd,n8	0	1	0	n5	Rd					n4-2			n7-6		1	0	?	c.lwsp
-Rd' = SP + u10	0	0	0	u9-2								Rd'			0	0	1	c.addi4spn
+PUSH Rs,u8	1	1	0	u5-2				u7-6		Rs					1	0	?	c.swsp
+POP Rd,u8	0	1	0	u5	Rd					u4-2			u7-6		1	0	?	c.lwsp
+Rd' = SP + u10	0	0	0	u5-4		u9-6				u2	u3	Rd'			0	0	1	c.addi4spn
 SP += n10	0	1	1	n9	0	0	0	1	0	n4	n6	n8-7		n5	0	1	1	c.addi16sp
 */})
 </script>
