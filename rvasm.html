@@ -24,6 +24,9 @@ body {
 	text-align: left;
 	border: none;
 }
+.tarmasm th:last-child {
+	width: 5em;
+}
 .tarmasm td {
 	text-align: center;
 	font-size: 92%;
@@ -45,10 +48,10 @@ a {
 <table id="t1188a" class=tarmasm></table>
 <script>
 makeTable("t1188a", function() {/*
-代入	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles	op
-Rd = n6	0	0	1	n5	Rd					n4-0					0	1	1	c.li
-Rd = n18	0	1	1	n17	Rd					n16-12					0	1	1	c.lui
-Rd = Rm	1	0	0	0	Rd					Rm					1	0	1	c.mv
+代入	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	op
+Rd = n6	0	0	1	n5	Rd					n4-0					0	1	c.li
+Rd = n18	0	1	1	n17	Rd					n16-12					0	1	c.lui
+Rd = Rm	1	0	0	0	Rd					Rm					1	0	c.mv
 */})
 </script>
 ※RdはR0以外、R0=0固定<br>
@@ -56,17 +59,17 @@ Rd = Rm	1	0	0	0	Rd					Rm					1	0	1	c.mv
 <table id="t1188b" class=tarmasm></table>
 <script>
 makeTable("t1188b", function() {/*
-演算	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles	op
-Rd += n6	0	0	0	n5	Rd					n4-0					0	1	1	c.addi
-Rd &lt;&lt;= u6	0	0	0	u5	Rd					u4-0					1	0	1	c.slli
-Rd += Rm	1	0	0	1	Rd					Rm					1	0	1	c.add
-Rd' &gt;&gt;= u6	1	0	0	u5	0	0	Rd'			u4-0					0	1	1	c.srli
-Rd' &gt;&gt;&gt;= u6	1	0	0	u5	0	1	Rd'			u4-0					0	1	1	c.srai
-Rd' &amp;= n6	1	0	0	n5	1	0	Rd'			n4-0					0	1	1	c.andi
-Rd' = -Rm'	1	0	0	0	1	1	Rd'			0	0	Rm'			0	1	1	c.sub
-Rd' ^= Rm'	1	0	0	0	1	1	Rd'			0	1	Rm'			0	1	1	c.xor
-Rd' |= Rm'	1	0	0	0	1	1	Rd'			1	0	Rm'			0	1	1	c.or
-Rd' &amp;= Rm'	1	0	0	0	1	1	Rd'			1	1	Rm'			0	1	1	c.and
+演算	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	op
+Rd += n6	0	0	0	n5	Rd					n4-0					0	1	c.addi
+Rd &lt;&lt;= u6	0	0	0	u5	Rd					u4-0					1	0	c.slli
+Rd += Rm	1	0	0	1	Rd					Rm					1	0	c.add
+Rd' &gt;&gt;= u6	1	0	0	u5	0	0	Rd'			u4-0					0	1	c.srli
+Rd' &gt;&gt;&gt;= u6	1	0	0	u5	0	1	Rd'			u4-0					0	1	c.srai
+Rd' &amp;= n6	1	0	0	n5	1	0	Rd'			n4-0					0	1	c.andi
+Rd' = -Rm'	1	0	0	0	1	1	Rd'			0	0	Rm'			0	1	c.sub
+Rd' ^= Rm'	1	0	0	0	1	1	Rd'			0	1	Rm'			0	1	c.xor
+Rd' |= Rm'	1	0	0	0	1	1	Rd'			1	0	Rm'			0	1	c.or
+Rd' &amp;= Rm'	1	0	0	0	1	1	Rd'			1	1	Rm'			0	1	c.and
 */})
 </script>
 ※Rd' = R(d+8) (3bitでR8-R15を指定)<br>
@@ -75,13 +78,13 @@ Rd' &amp;= Rm'	1	0	0	0	1	1	Rd'			1	1	Rm'			0	1	1	c.and
 <table id="t1188c" class=tarmasm></table>
 <script>
 makeTable("t1188c", function() {/*
-M拡張演算	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles	op
-Rd = Rm * Rs	Rm0	0	0	0	Rd					0	1	1	0	0	1	1	1	mul
-	0	0	0	0	0	0	1	Rs					Rm4-1				-	-
-Rd = Rm / Rs	Rm0	1	0	0	Rd					0	1	1	0	0	1	1	?	div
-	0	0	0	0	0	0	1	Rs					Rm4-1				-	-
-Rd = Rm % Rs	Rm0	1	1	0	Rd					0	1	1	0	0	1	1	?	rem
-	0	0	0	0	0	0	1	Rs					Rm4-1				-	-
+M拡張演算	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	op
+Rd = Rm * Rs	Rm0	0	0	0	Rd					0	1	1	0	0	1	1	mul
+	0	0	0	0	0	0	1	Rs					Rm4-1				-
+Rd = Rm / Rs	Rm0	1	0	0	Rd					0	1	1	0	0	1	1	div
+	0	0	0	0	0	0	1	Rs					Rm4-1				-
+Rd = Rm % Rs	Rm0	1	1	0	Rd					0	1	1	0	0	1	1	rem
+	0	0	0	0	0	0	1	Rs					Rm4-1				-
 */})
 </script>
 ※mul/div/remにC命令なし、mulh,mulhsu,mulhu,divu,remuもある<br>
@@ -97,9 +100,9 @@ Rd = Rm % Rs	Rm0	1	1	0	Rd					0	1	1	0	0	1	1	?	rem
 <table id="t1479a" class=tarmasm></table>
 <script>
 makeTable("t1479a", function() {/*
-メモリアクセス	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles	op
-Rd' = [Rn' + u7]L	0	1	0	u5-3			Rn'			u2	u6	Rd'			0	0	?	c.lw
-[Rn' + u7]L = Rd'	1	1	0	u5-3			Rn'			u2	u6	Rd'			0	0	?	c.sw
+メモリアクセス	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	op
+Rd' = [Rn' + u7]L	0	1	0	u5-3			Rn'			u2	u6	Rd'			0	0	c.lw
+[Rn' + u7]L = Rd'	1	1	0	u5-3			Rn'			u2	u6	Rd'			0	0	c.sw
 */})
 </script>
 ※[]後の記号でメモリサイズと符号を表す（W:2byte、L:4byte、C:符号付き1byte、S:符号付き2byte）<br>
@@ -108,13 +111,13 @@ Rd' = [Rn' + u7]L	0	1	0	u5-3			Rn'			u2	u6	Rd'			0	0	?	c.lw
 <table id="t1188d" class=tarmasm></table>
 <script>
 makeTable("t1188d", function() {/*
-分岐	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles	op
-IF !Rs' GOTO n9	1	1	0	n8	n4-3		Rs'			n7-6		n2-1		n5	0	1	?	c.beqz
-IF Rs' GOTO n9	1	1	1	n8	n4-3		Rs'			n7-6		n2-1		n5	0	1	?	c.bnez
-GOTO n12	1	0	1	n11	n4	n9-8		n10	n6	n7	n3-1			n5	0	1	?	c.j
-GOTO Rs	1	0	0	0	Rs					0	0	0	0	0	1	0	?	c.jr
-GOSUB Rs	1	0	0	1	Rs					0	0	0	0	0	1	0	?	c.jalr
-RET (=GOTO R1)	1	0	0	0	0	0	0	0	1	0	0	0	0	0	1	0	?	c.ret?
+分岐	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	op
+IF !Rs' GOTO n9	1	1	0	n8	n4-3		Rs'			n7-6		n2-1		n5	0	1	c.beqz
+IF Rs' GOTO n9	1	1	1	n8	n4-3		Rs'			n7-6		n2-1		n5	0	1	c.bnez
+GOTO n12	1	0	1	n11	n4	n9-8		n10	n6	n7	n3-1			n5	0	1	c.j
+GOTO Rs	1	0	0	0	Rs					0	0	0	0	0	1	0	c.jr
+GOSUB Rs	1	0	0	1	Rs					0	0	0	0	0	1	0	c.jalr
+RET (=GOTO R1)	1	0	0	0	0	0	0	0	1	0	0	0	0	0	1	0	c.ret?
 */})
 /*
 本来はn24だけど、n22としておく、n22からn24に拡張された後がある
@@ -127,11 +130,11 @@ CALL n24 &lt;&lt; 1	1	1	1	1	0	S	n24(20-11)										-
 <table id="t1479b" class=tarmasm></table>
 <script>
 makeTable("t1479b", function() {/*
-スタック	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles	op
-PUSH Rs,u8	1	1	0	u5-2				u7-6		Rs					1	0	?	c.swsp
-POP Rd,u8	0	1	0	u5	Rd					u4-2			u7-6		1	0	?	c.lwsp
-Rd' = SP + u10	0	0	0	u5-4		u9-6				u2	u3	Rd'			0	0	1	c.addi4spn
-SP += n10	0	1	1	n9	0	0	0	1	0	n4	n6	n8-7		n5	0	1	1	c.addi16sp
+スタック	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	op
+PUSH Rs,u8	1	1	0	u5-2				u7-6		Rs					1	0	c.swsp
+POP Rd,u8	0	1	0	u5	Rd					u4-2			u7-6		1	0	c.lwsp
+Rd' = SP + u10	0	0	0	u5-4		u9-6				u2	u3	Rd'			0	0	c.addi4spn
+SP += n10	0	1	1	n9	0	0	0	1	0	n4	n6	n8-7		n5	0	1	c.addi16sp
 */})
 </script>
 ※n8:4byte単位のオフセット<br>
@@ -140,11 +143,11 @@ SP += n10	0	1	1	n9	0	0	0	1	0	n4	n6	n8-7		n5	0	1	1	c.addi16sp
 <table id="t1479e" class=tarmasm></table>
 <script>
 makeTable("t1479e", function() {/*
-その他	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	cycles	op
-NOP (=1)	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	1	c.nop
-BKPT	1	0	0	1	0	0	0	0	0	0	0	0	0	0	1	0	?	c.ebreak
-WFI	0	0	0	0	0	0	0	0	0	1	1	1	0	0	1	1	?	wfi
-	0	0	0	1	0	0	0	0	0	1	0	1	0	0	0	0	-	-
+その他	15	14	13	12	11	10	9	8	7	6	5	4	3	2	1	0	op
+NOP (=1)	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	c.nop
+BKPT	1	0	0	1	0	0	0	0	0	0	0	0	0	0	1	0	c.ebreak
+WFI	0	0	0	0	0	0	0	0	0	1	1	1	0	0	1	1	wfi
+	0	0	0	1	0	0	0	0	0	1	0	1	0	0	0	0	-
 */})
 </script>
 ※NOP:なにもしない(no operation) R0+=0<br>
