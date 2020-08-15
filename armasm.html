@@ -50,7 +50,8 @@ Rd = u8	0	0	1	0	0	Rd			u8								1
 Rd = Rm	0	1	0	0	0	1	1	0	Rd3	Rm				Rd2-0			1,3
 */})
 </script>
-※Rd3とRd2-0の4bitでRdを指定する、RdがPCの時3cycles
+※Rd3とRd2-0の4bitでRdを指定する、RdがPCの時3cycles<br>
+※Rd = Rm はフラグ変化なし（R0-R7で、Rd = Rm + 0 はフラグ変化する）
 
 <table id="t1188b" class=tarmasm></table>
 <script>
@@ -78,6 +79,7 @@ Rd ^= Rm	0	1	0	0	0	0	0	0	0	1	Rm			Rd			1
 </script>
 ※Rd3とRd2-0の4bitでRdを指定する、Rd=PCの時3cycles<br>
 ※Rd=PC+u8: u8は4byte単位<br>
+※Rd += Rm はフラグ変化なし（Rd = Rd + Rm はフラグ変化する）
 
 <table id="t1479a" class=tarmasm></table>
 <script>
@@ -168,13 +170,13 @@ Rd = ASR(Rm, u5)	0	0	0	1	0	u5					Rm			Rd			1
 ASR Rd, Rm	0	1	0	0	0	0	0	1	0	0	Rm			Rd			1
 BIC Rd, Rm	0	1	0	0	0	0	1	1	1	0	Rm			Rd			1
 ROR Rd, Rm	0	1	0	0	0	0	0	1	1	1	Rm			Rd			1
-ADC Rd, Rm	0	1	0	0	0	0	0	1	0	1	Rm			Rd			1
-SBC Rd, Rm	0	1	0	0	0	0	0	1	1	0	Rm			Rd			1
+Rd += Rm + C	0	1	0	0	0	0	0	1	0	1	Rm			Rd			1
+Rd -= Rd + !C	0	1	0	0	0	0	0	1	1	0	Rm			Rd			1
 */})
 </script>
 ※BIC:ビットクリア、ASR:符号付き右シフト、ROR:右ローテート<br>
 ※REV:byteオーダー反転、REV16:byteオーダー反転(2byteずつ)、REVSH:符号付き16bitを反転32bit化<br>
-※ADC:キャリー付き足し算、SBC:キャリー付き引き算<br>
+※C:キャリーフラグ付き演算(ADC/SBC)<br>
 
 <table id="t1479d" class=tarmasm></table>
 <script>
@@ -250,6 +252,9 @@ todo
 <a href=https://fukuno.jig.jp/1872>10. マシン語を制するもの時間を制す</a><br>
 <a href=https://fukuno.jig.jp/1889>11. 画面をイチゴで埋め尽くす12の方法</a><br>
 <a href=https://fukuno.jig.jp/2035>12. レジスタ不足に上位レジスタとスタック操作</a><br>
+<a href=https://fukuno.jig.jp/2493>13. コンパイラはじめのいっぽ、EVAL実現法とマシン語生成</a><br>
+<a href=https://fukuno.jig.jp/2494>14. サイズを取るかスピードを取るか、割り算のアルゴリズムとマシン語実装</a><br>
+<a href=https://fukuno.jig.jp/2495>15. マシン語化で1万倍速!? セットで学ぶアルゴリズムとコンピューター</a><br>
 <!--
 クロックを意識して特殊演算
 	4byte rotate

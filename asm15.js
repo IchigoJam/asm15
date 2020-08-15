@@ -32,7 +32,7 @@ var token_dict = {
 "^":"\\^",
 "not":"(?:\\~|not)",
 
-"cond":"(eq|ne|cs|cc|mi|pl|vs|vc|hi|ls|ge|lt|gt|le|al)",
+"cond":"(eq|ne|cs|cc|mi|pl|vs|vc|hi|ls|ge|lt|gt|le|al|hs|lo)",
 
 "*":"\\*",
 "if":"if",
@@ -198,6 +198,11 @@ function bl(bits,s,ofs){
 }
 function cond(ofs, invert) {
 	var f = function(d, pc) {
+		if (d == "hs") {
+			d = "cs";
+		} else if (d == "lo") {
+			d = "cc";
+		}
 		var n = "eq|ne|cs|cc|mi|pl|vs|vc|hi|ls|ge|lt|gt|le|al".indexOf(d) / 3;
 		if (invert)
 			n ^= 1;
@@ -229,7 +234,9 @@ var cmdlist = [
 ["ror reg , reg",0x41c0,b(3,0),b(3,3)],
 ["bic reg , reg",0x4380,b(3,0),b(3,3)],
 ["adc reg , reg",0x4140,b(3,0),b(3,3)],
+["reg + = reg + c",0x4140,b(3,0),b(3,3)],
 ["sbc reg , reg",0x4180,b(3,0),b(3,3)],
+["reg - = reg + ! c",0x4180,b(3,0),b(3,3)],
 
 //jmp
 ["if 0 goto n",0xd000,n(8,0,-2,1)],
@@ -378,7 +385,7 @@ function asmln(ln, prgctr) {
 	for (var j = 0; j < patlist.length; j++) {
 		var m = ln.match(patlist[j]);
 		if (m) {
-			//console.log(patlist[j] + " " + m);
+			// console.log(patlist[j] + " " + m);
 			var p = build_m(cmdlist[j], m, prgctr);
 			return p;
 		}
