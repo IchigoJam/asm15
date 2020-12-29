@@ -66,7 +66,7 @@ Rd += Rm	1	0	0	1	Rd					Rm					1	0	c.add
 Rd' &gt;&gt;= u6	1	0	0	u5	0	0	Rd'			u4-0					0	1	c.srli
 Rd' &gt;&gt;&gt;= u6	1	0	0	u5	0	1	Rd'			u4-0					0	1	c.srai
 Rd' &amp;= n6	1	0	0	n5	1	0	Rd'			n4-0					0	1	c.andi
-Rd' = -Rm'	1	0	0	0	1	1	Rd'			0	0	Rm'			0	1	c.sub
+Rd' -= Rm'	1	0	0	0	1	1	Rd'			0	0	Rm'			0	1	c.sub
 Rd' ^= Rm'	1	0	0	0	1	1	Rd'			0	1	Rm'			0	1	c.xor
 Rd' |= Rm'	1	0	0	0	1	1	Rd'			1	0	Rm'			0	1	c.or
 Rd' &amp;= Rm'	1	0	0	0	1	1	Rd'			1	1	Rm'			0	1	c.and
@@ -125,7 +125,7 @@ CALL n24 &lt;&lt; 1	1	1	1	1	0	S	n24(20-11)										-
 -	1	1	J1	1	J2	n24(10-0)											4
 */
 </script>
-※n12:飛び先との16bit命令数の差分を指定<br>
+※n12:飛び先とのバイト数の差分（n11でn12の1/2の値で指定）<br>
 
 <table id="t1479b" class=tarmasm></table>
 <script>
